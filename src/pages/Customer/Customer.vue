@@ -79,17 +79,33 @@
         </div>
       </div>
     </Forms>
-    <fwb-card class="w-full p-5 mt-4">
-
-    </fwb-card>
+    <Tables
+      :columns="['Nome', 'Sobrenome', 'Celular', 'Documento', 'Ações']"
+      hasSearch
+      class="w-full p-5 mt-4">
+      <fwb-table-row v-if="accounts.length === 0">
+        <td colspan="5" class="text-center py-4">
+          Nenhum dado encontrado.
+        </td>
+      </fwb-table-row>
+      <fwb-table-row v-else v-for="(account, index) in accounts" :key="account.id">
+        <TableColumn isText :value="account.name" />
+        <TableColumn isText :value="account.surname" />
+        <TableColumn isText :value="account.cellphone" />
+        <TableColumn isText :value="account.document" />
+        <TableColumn isActions hasEdit hasDelete v-on:line:edit="onEdit(account)" v-on:line:delete="onEdit(account)" />
+      </fwb-table-row>
+    </Tables>
   </div>
 </template>
 
 <script setup>
-import { FwbCard, FwbHeading, FwbInput, FwbTextarea } from 'flowbite-vue'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FwbInput, FwbTextarea, FwbTableRow } from 'flowbite-vue'
 import { computed } from 'vue'
 import Forms from '@/components/dataManagers/Forms/forms.vue'
+import Tables from '@/components/dataManagers/Tables/tables.vue'
+import TableColumn from '@/components/dataManagers/TableColumn/tableColumn.vue'
+import { ref } from 'vue'
 
 const maskaConfig = computed(() => ({
   mask: (value) => {
@@ -102,4 +118,10 @@ const maskaConfig = computed(() => ({
     return '##.###.###/####-##'
   }
 }))
+
+const accounts = ref([])
+
+const onEdit = (msg) => {
+  alert(`Edit event triggered! Message: ${msg}`)
+}
 </script>
