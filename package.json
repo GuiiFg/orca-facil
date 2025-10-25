@@ -43,6 +43,7 @@
     "electron-squirrel-startup": "^1.0.1",
     "flowbite": "^3.1.2",
     "flowbite-vue": "^0.2.2",
+    "maska": "^3.2.0",
     "vue": "^3.5.22",
     "vue-router": "^4.6.3"
   }
