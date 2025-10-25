@@ -1,12 +1,6 @@
 <template>
   <div class="p-3">
-    <FwbHeading tag="h4"><FontAwesomeIcon icon="fas fa-user" /> Clientes</FwbHeading>
-    <div>
-      <p class="font-normal text-gray-700 dark:text-gray-400">
-        Cadastre e gerencie seus clientes aqui
-      </p>
-    </div>
-    <fwb-card class="w-full p-5 mt-4">
+    <Forms title="Cadastro de Clientes" description="Cadastre e gerencie seus clientes." icon="fas fa-user" >
       <div>
         <p class="font-normal text-gray-700 dark:text-gray-400">
           Informações básicas
@@ -84,14 +78,9 @@
           <FwbTextarea placeholder="Digite as observações sobre o cliente" />
         </div>
       </div>
-      <div class="flex justify-between mt-4">
-        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer">
-          <FontAwesomeIcon icon="fas fa-save" /> Salvar
-        </button>
-        <button class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded cursor-pointer">
-          <FontAwesomeIcon icon="fas fa-eraser" /> Limpar
-        </button>
-      </div>
+    </Forms>
+    <fwb-card class="w-full p-5 mt-4">
+
     </fwb-card>
   </div>
 </template>
@@ -100,6 +89,7 @@
 import { FwbCard, FwbHeading, FwbInput, FwbTextarea } from 'flowbite-vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed } from 'vue'
+import Forms from '@/components/dataManagers/Forms/forms.vue'
 
 const maskaConfig = computed(() => ({
   mask: (value) => {
