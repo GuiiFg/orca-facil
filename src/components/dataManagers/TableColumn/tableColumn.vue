@@ -13,7 +13,7 @@ import {
 } from 'flowbite-vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
-const emit = defineEmits(['custom-event']);
+const emit = defineEmits(['line:edit', 'line:delete']);
 
 const handleEmit = (eventName) => {
   emit(eventName);

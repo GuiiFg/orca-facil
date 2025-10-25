@@ -1,9 +1,10 @@
 import { app, BrowserWindow } from 'electron';
 import path from 'node:path';
-import started from 'electron-squirrel-startup';
+const squirrelStartup = require('electron-squirrel-startup');
+import './main/db/icpHandlers/index.js';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (started) {
+if (squirrelStartup) {
   app.quit();
 }
 

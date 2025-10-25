@@ -8,10 +8,10 @@
   <fwb-card class="w-full p-5 mt-4">
     <slot />
     <div class="flex justify-between mt-4">
-      <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer">
+      <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer" @click="handleEmit('form:save')">
         <FontAwesomeIcon icon="fas fa-save" /> Salvar
       </button>
-      <button class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded cursor-pointer">
+      <button class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded cursor-pointer" @click="handleEmit('form:clear')">
         <FontAwesomeIcon icon="fas fa-eraser" /> Limpar
       </button>
     </div>
@@ -21,6 +21,12 @@
 <script setup>
 import { FwbCard, FwbHeading } from 'flowbite-vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
+const emit = defineEmits(['form:save', 'form:clear']);
+
+const handleEmit = (eventName) => {
+  emit(eventName);
+}
 
 const props = defineProps({
   title: {
