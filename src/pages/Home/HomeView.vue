@@ -1,8 +1,63 @@
 <template>
-  <h1>Home</h1>
-  <fwb-alert type="success">Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quos.</fwb-alert>
+  <div class="p-5">
+    <fwb-timeline>
+      <fwb-timeline-item>
+        <fwb-timeline-point />
+        <fwb-timeline-content>
+          <fwb-timeline-time>
+            February 2020
+          </fwb-timeline-time>
+          <fwb-timeline-title>
+            Application UI code in Tailwind CSS
+          </fwb-timeline-title>
+          <fwb-timeline-body>
+            Get access to over 20+ pages including a dashboard layout, charts,
+            kanban board, calendar, and pre-order E-commerce & Marketing pages.
+          </fwb-timeline-body>
+        </fwb-timeline-content>
+      </fwb-timeline-item>
+      <fwb-timeline-item>
+        <fwb-timeline-point />
+        <fwb-timeline-content>
+          <fwb-timeline-time>
+            February 2020
+          </fwb-timeline-time>
+          <fwb-timeline-title>
+            Application UI code in Tailwind CSS
+          </fwb-timeline-title>
+          <fwb-timeline-body>
+            Get access to over 20+ pages including a dashboard layout, charts,
+            kanban board, calendar, and pre-order E-commerce & Marketing pages.
+          </fwb-timeline-body>
+        </fwb-timeline-content>
+      </fwb-timeline-item>
+      <fwb-timeline-item>
+        <fwb-timeline-point />
+        <fwb-timeline-content>
+          <fwb-timeline-time>
+            February 2020
+          </fwb-timeline-time>
+          <fwb-timeline-title>
+            Application UI code in Tailwind CSS
+          </fwb-timeline-title>
+          <fwb-timeline-body>
+            Get access to over 20+ pages including a dashboard layout, charts,
+            kanban board, calendar, and pre-order E-commerce & Marketing pages.
+          </fwb-timeline-body>
+        </fwb-timeline-content>
+      </fwb-timeline-item>
+    </fwb-timeline>
+  </div>
 </template>
 
 <script setup>
-import { FwbAlert } from 'flowbite-vue'
+import {
+  FwbTimeline,
+  FwbTimelineBody,
+  FwbTimelineContent,
+  FwbTimelineItem,
+  FwbTimelinePoint,
+  FwbTimelineTime,
+  FwbTimelineTitle,
+} from 'flowbite-vue'
 </script>

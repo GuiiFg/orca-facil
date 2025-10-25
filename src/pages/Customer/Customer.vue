@@ -84,6 +84,14 @@
           <FwbTextarea placeholder="Digite as observações sobre o cliente" />
         </div>
       </div>
+      <div class="flex justify-between mt-4">
+        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer">
+          <FontAwesomeIcon icon="fas fa-save" /> Salvar
+        </button>
+        <button class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded cursor-pointer">
+          <FontAwesomeIcon icon="fas fa-eraser" /> Limpar
+        </button>
+      </div>
     </fwb-card>
   </div>
 </template>
