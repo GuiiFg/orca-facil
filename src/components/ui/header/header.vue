@@ -1,6 +1,12 @@
 <template>
-  <FwbNavbar class="bg-white border-b border-gray-200">
-    <div><FwbHeading tag="h4"><FontAwesomeIcon style="cursor: pointer;" icon="fas fa-bars" @click="sideBarActions.toggle()"></FontAwesomeIcon> Orça Fácil</FwbHeading></div>
+  <FwbNavbar class="bg-white border-b border-gray-200" style="position: relative; z-index: 50;">
+    <div>
+      <FwbHeading tag="h4">
+        <FontAwesomeIcon v-if="sideBarActions.sidebarOpen" style="cursor: pointer;" icon="fas fa-times" @click="sideBarActions.toggle()"></FontAwesomeIcon>
+        <FontAwesomeIcon v-else style="cursor: pointer;" icon="fas fa-bars" @click="sideBarActions.toggle()"></FontAwesomeIcon>
+        <span>Orça Fácil</span>
+      </FwbHeading>
+    </div>
     <FwbNavbarCollapse>
       <FwbNavbarLink>
         <router-link :to="{ name: 'home' }">
