@@ -8,8 +8,8 @@
         <!-- <SidebarDropItem label="Relacionamentos" icon="fas fa-users">
           <SidebarItem label="Clientes" :click="handleGoToCustomer" className="pl-10"/>
         </SidebarDropItem> -->
-        <SidebarItem label="Produtos e Serviços" icon="fas fa-box" :click="handleGoToHome" />
-        <SidebarItem label="Meios de Pagamento" icon="fas fa-credit-card" :click="handleGoToHome" />
+        <SidebarItem label="Produtos e Serviços" icon="fas fa-box" :click="handleGoToProductsAndServices" />
+        <SidebarItem label="Meios de Pagamento" icon="fas fa-credit-card" :click="handleGoToPayments" />
         <SidebarItem label="Configurações" icon="fas fa-cog" :click="handleGoToHome" />
       </FwbSidebar>
     </transition>
@@ -27,6 +27,20 @@ const router = useRouter()
 
 const handleGoToCustomer = () => {
   router.push({ name: 'customer' })
+  if (sideBarActions.sidebarOpen) {
+    sideBarActions.toggle()
+  }
+}
+
+const handleGoToProductsAndServices = () => {
+  router.push({ name: 'products' })
+  if (sideBarActions.sidebarOpen) {
+    sideBarActions.toggle()
+  }
+}
+
+const handleGoToPayments = () => {
+  router.push({ name: 'payments' })
   if (sideBarActions.sidebarOpen) {
     sideBarActions.toggle()
   }
