@@ -2,7 +2,6 @@ import { ipcMain } from 'electron';
 import db from '../../index.js';
 
 export function createCustomer(customerData) {
-  console.log('Creating customer with data:', customerData);
   const stmt = db.prepare(`
     INSERT INTO customer (name, surname, email, phone, cellphone, document, zipcode, state, city, district, street, number, complement, notes)
     VALUES (@name, @surname, @email, @phone, @cellphone, @document, @zipcode, @state, @city, @district, @street, @number, @complement, @notes)
@@ -16,7 +15,7 @@ export function getCustomerById(id) {
   return stmt.get(id);
 }
 
-export function updateCustomer(id, customerData) {
+export function updateCustomer(customerData) {
   const stmt = db.prepare(`
     UPDATE customer SET
       name = @name,
@@ -35,7 +34,7 @@ export function updateCustomer(id, customerData) {
       notes = @notes
     WHERE id = @id
   `);
-  const info = stmt.run({ ...customerData, id });
+  const info = stmt.run({ ...customerData });
   return info.changes > 0;
 }
 
@@ -45,9 +44,17 @@ export function deleteCustomer(id) {
   return info.changes > 0;
 }
 
-export function listCustomers(searchValue = null, limit = 5, index = 0) {
+export function listCustomers(searchValue = null, limit = 5, index = 1) {
   let stmt;
 
+  const reponse = {
+    data: [],
+    total: 0,
+    pages: 0,
+    currentPage: index
+  }
+
+  index = index > 0 ? index - 1 : 0;
   const query = `SELECT * FROM customer
       WHERE active = 1 ` + (searchValue ? `AND (name LIKE ? OR email LIKE ? OR document LIKE ? ) ` : '') + `
       ORDER BY name
@@ -55,10 +62,27 @@ export function listCustomers(searchValue = null, limit = 5, index = 0) {
   if (searchValue) {
     const likeValue = `%${searchValue}%`;
     stmt = db.prepare(query);
-    return stmt.all(likeValue, likeValue, likeValue, limit, index * limit);
+    reponse.data = stmt.all(likeValue, likeValue, likeValue, limit, index * limit);
+    const countQuery = `SELECT COUNT(*) as count FROM customer
+      WHERE active = 1 AND (name LIKE ? OR email LIKE ? OR document LIKE ?)`;
+    const countStmt = db.prepare(countQuery);
+    const countResult = countStmt.get(likeValue, likeValue, likeValue);
+    reponse.total = countResult.count;
+    reponse.pages = Math.ceil(reponse.total / limit);
+
+    return reponse;
   } else {
+
     stmt = db.prepare(query);
-    return stmt.all(limit, index * limit);
+    reponse.data = stmt.all(limit, index * limit);
+    const countQuery = `SELECT COUNT(*) as count FROM customer
+      WHERE active = 1`;
+    const countStmt = db.prepare(countQuery);
+    const countResult = countStmt.get();
+    reponse.total = countResult.count;
+    reponse.pages = Math.ceil(reponse.total / limit);
+
+    return reponse;
   }
 }
 
@@ -68,8 +92,8 @@ ipcMain.handle('db:createCustomer', async (event, customerData) => {
 });
 
 ipcMain.handle('db:listCustomers', async (event, searchValue, limit, index) => {
-  const customers = listCustomers(searchValue, limit, index);
-  return { customers };
+  const response = listCustomers(searchValue, limit, index);
+  return { ...response };
 });
 
 ipcMain.handle('db:getCustomerById', async (event, id) => {
@@ -77,8 +101,8 @@ ipcMain.handle('db:getCustomerById', async (event, id) => {
   return { customer };
 });
 
-ipcMain.handle('db:updateCustomer', async (event, id, customerData) => {
-  const success = updateCustomer(id, customerData);
+ipcMain.handle('db:updateCustomer', async (event, customerData) => {
+  const success = updateCustomer(customerData);
   return { success };
 });
 

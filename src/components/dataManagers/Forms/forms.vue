@@ -1,6 +1,6 @@
 <template>
-  <FwbHeading tag="h4"><FontAwesomeIcon :icon="props.icon" /> {{ props.title }}</FwbHeading>
-  <div>
+  <FwbHeading v-if="hasHeader" tag="h4"><FontAwesomeIcon :icon="props.icon" /> {{ props.title }}</FwbHeading>
+  <div v-if="hasHeader">
     <p class="font-normal text-gray-700 dark:text-gray-400">
       {{ props.description }}
     </p>
@@ -43,6 +43,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: 'fas fa-file-alt'
+  },
+  hasHeader: {
+    type: Boolean,
+    required: false,
+    default: true
   }
 })
 </script>
