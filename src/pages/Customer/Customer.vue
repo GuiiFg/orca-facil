@@ -300,6 +300,7 @@ const handleUpdate = () => {
   window.api.customer.update(value)
   handleClear()
   handleSearchClients()
+  showFormModal.value = false
 }
 
 const handleCreate = async () => {
@@ -307,6 +308,7 @@ const handleCreate = async () => {
   await window.api.customer.add(value)
   handleClear()
   await handleSearchClients()
+  showFormModal.value = false
 }
 
 const handleDelete = async (customer) => {
