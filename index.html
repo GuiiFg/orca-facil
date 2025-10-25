@@ -8,4 +8,9 @@
     <div id="app"></div>
     <script type="module" src="/src/renderer.js"></script>
   </body>
+  <script>
+    try {
+      require('electron-reloader')(module);
+    } catch {}
+  </script>
 </html>
