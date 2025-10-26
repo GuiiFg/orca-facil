@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="bg-white dark:bg-gray-900">
     <transition name="sidebar" appear>
       <FwbSidebar v-show="sideBarActions.sidebarOpen" class="w-64 h-screen bg-white border-r sidebar side-bar-entry-header">
         <SidebarItem label="Início" icon="fas fa-house" :click="handleGoToHome" />

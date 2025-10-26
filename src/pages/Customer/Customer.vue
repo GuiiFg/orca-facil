@@ -1,5 +1,5 @@
 <template>
-  <div class="p-3">
+  <div class="p-3 overflow-y-auto">
     <div>
       <FwbHeading tag="h4"><FontAwesomeIcon icon="fas fa-user" /> Clientes</FwbHeading>
       <div>

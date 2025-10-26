@@ -15,7 +15,9 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      external: ['better-sqlite3'],
+      external: ['better-sqlite3'], // Exclui o módulo do bundle
     },
   },
 });
+
+console.log('Database path:', path.resolve(__dirname, 'src', 'data', 'database.db'));
