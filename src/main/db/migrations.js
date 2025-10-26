@@ -20,6 +20,30 @@ export function runMigrations() {
       notes TEXT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       active INTEGER DEFAULT 1
-    )
+    );
   `).run();
+
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS product (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        code TEXT NOT NULL UNIQUE,
+        name TEXT NULL,
+        amount REAL NULL,
+        type INTEGER NULL,
+        cost REAL NULL,
+        description TEXT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        active INTEGER DEFAULT 1
+    );
+ `).run();
+
+    db.prepare(`
+    CREATE TABLE IF NOT EXISTS payment (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        description TEXT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        active INTEGER DEFAULT 1
+    );
+ `).run();
 }
