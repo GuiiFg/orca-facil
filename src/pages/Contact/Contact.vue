@@ -84,6 +84,6 @@
 
 <script setup>
 import { FwbCard, FwbImg, FwbHeading } from 'flowbite-vue'
-import Pado from '../../images/Pado.jpeg'
-import Farias from '../../images/Farias.png'
+import Pado from '@/assets/images/Pado.jpeg'
+import Farias from '@/assets/images/Farias.png'
 </script>

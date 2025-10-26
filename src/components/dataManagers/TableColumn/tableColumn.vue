@@ -5,6 +5,9 @@
     <FontAwesomeIcon v-if="props.hasEdit" icon="fas fa-edit" class="ml-3 text-blue-400" style="cursor: pointer;" @click="handleEmit('line:edit')" />
     <FontAwesomeIcon v-if="props.hasDelete" icon="fas fa-trash" class="ml-3 text-red-400" style="cursor: pointer;" @click="handleEmit('line:delete')" />
   </fwb-table-cell>
+  <fwb-table-cell v-if="props.isCustom">
+    <slot></slot>
+  </fwb-table-cell>
 </template>
 
 <script setup>
@@ -49,6 +52,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: ''
+  },
+  isCustom: {
+    type: Boolean,
+    required: false,
+    default: false
   }
 })
 

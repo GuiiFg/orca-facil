@@ -21,10 +21,12 @@
       </template>
       <template #body>
         <Forms
-            title="Produtos e Serviços"
-            description="Cadastre e gerencie seus produtos e serviços aqui."
-            icon="fas fa-box"
-            :hasHeader="false"
+          title="Produtos e Serviços"
+          description="Cadastre e gerencie seus produtos e serviços aqui."
+          icon="fas fa-box"
+          @form:save="handleSave"
+          @form:clear="handleClear"
+          :hasHeader="false"
         >
           <div>
             <p class="font-normal text-gray-700 dark:text-gray-400">
@@ -48,11 +50,15 @@
             <div class="grow">
               <p class="font-medium text-gray-900 dark:text-white mb-2">Nome:</p>
               <FwbInput
-                  type="text"
-                  placeholder="Digite o nome do produto ou serviço"
-                  v-model="form.name.value"
-                  :validation-status="form.name.status"
-                  :required="form.name.required"/>
+                type="text"
+                placeholder="Digite o nome do produto ou serviço"
+                v-model="form.name.value"
+                :validation-status="form.name.status"
+                :required="form.name.required">
+                <template #validationMessage>
+                  <span v-for="msg in form.name.errors" :key="msg">{{ msg }}</span>
+                </template>
+              </FwbInput>
             </div>
             <div class="grow">
               <p class="font-medium text-gray-900 dark:text-white mb-2">Valor:</p>
@@ -72,10 +78,14 @@
             <div class="grow">
               <p class="font-medium text-gray-900 dark:text-white mb-2">Tipo:</p>
               <fwb-select
-                  v-model="form.type.value"
-                  :options="form.type.options"
-                  :required="form.type.required"
-              />
+                v-model="form.type.value"
+                :options="form.type.options"
+                :validation-status="form.type.status"
+                :required="form.type.required">
+                <template #validationMessage>
+                  <span v-for="msg in form.type.errors" :key="msg">{{ msg }}</span>
+                </template>
+              </fwb-select>
             </div>
             <div class="grow">
               <p class="font-medium text-gray-900 dark:text-white mb-2">Custo:</p>
@@ -91,29 +101,29 @@
             <div class="grow">
               <p class="font-medium text-gray-900 dark:text-white mb-2">Descrição:</p>
               <FwbTextarea
-                  v-model="form.description.value"
-                  :validation-status="form.description.status"
-                  :required="form.description.required"
-                  placeholder="Digite a descrição do produto ou serviço" />
+                v-model="form.description.value"
+                :validation-status="form.description.status"
+                :required="form.description.required"
+                placeholder="Digite a descrição do produto ou serviço" />
             </div>
           </div>
         </Forms>
       </template>
     </FwbModal>
     <Tables
-        v-if="products"
-        :columns="['Código', 'Nome', 'Descrição', 'Valor', 'Ações']"
-        :page="currentPage"
-        :totalPages="totalPages"
-        :total="totalItems"
-        v-on:update:page="handleUpdatePage"
-        v-on:search="handleSearch"
-        v-on:reload="handleSearchProducts"
-        v-on:new="showFormModal = true"
-        hasSearch
-        hasNew
-        hasReload
-        class="w-full p-5 mt-4">
+      v-if="products"
+      :columns="['Código', 'Nome', 'Tipo', 'Valor', 'Ações']"
+      :page="currentPage"
+      :totalPages="totalPages"
+      :total="totalItems"
+      v-on:update:page="handleUpdatePage"
+      v-on:search="handleSearch"
+      v-on:reload="handleSearchProducts"
+      v-on:new="showFormModal = true"
+      hasSearch
+      hasNew
+      hasReload
+      class="w-full p-5 mt-4">
       <fwb-table-row v-if="products.length === 0">
         <td colspan="5" class="text-center py-4">
           Nenhum dado encontrado.
@@ -122,9 +132,11 @@
       <fwb-table-row v-else v-for="(product, index) in products" :key="product.id">
         <TableColumn isText :value="product.code" />
         <TableColumn isText :value="product.name" />
-        <TableColumn isText :value="product.description" />
-        <TableColumn isText :value="product.amount" />
-        <TableColumn isActions hasEdit hasDelete v-on:line:edit="onEdit(product)" v-on:line:delete="onEdit(product)" />
+        <TableColumn isCustom >
+          <span class="capitalize">{{ product.type }}</span>
+        </TableColumn>
+        <TableColumn isMoney :value="product.amount ? product.amount.toString() : '0'" />
+        <TableColumn isActions hasEdit hasDelete v-on:line:edit="handleEdit(product)" v-on:line:delete="handleDelete(product)" />
       </fwb-table-row>
     </Tables>
   </div>
