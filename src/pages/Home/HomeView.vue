@@ -10,7 +10,7 @@
       </p>
       <div class="flex flex-col space-y-4 sm:flex-row sm:justify-center sm:space-y-0">
         <button
-            @click="handleGoToProductsAndServices"
+            @click="handleGoToBudget"
             class="inline-flex justify-center items-center py-3 px-6 text-base font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900 transition"
         >
           Começar agora
@@ -73,7 +73,7 @@
     <h3 class="text-2xl font-semibold mb-3">Pronto para começar?</h3>
     <p class="text-gray-100 mb-6">Crie orçamentos profissionais em poucos cliques.</p>
     <button
-        @click="handleGoToProductsAndServices"
+        @click="handleGoToBudget"
         class="bg-white text-gray-800 font-semibold px-6 py-3 rounded-lg hover:bg-gray-200 transition"
     >
       Criar meu primeiro orçamento
@@ -89,6 +89,13 @@ const router = useRouter()
 
 const handleGoToProductsAndServices = () => {
   router.push({ name: 'products' })
+  if (sideBarActions.sidebarOpen) {
+    sideBarActions.toggle()
+  }
+}
+
+const handleGoToBudget = () => {
+  router.push({ name: 'budget' })
   if (sideBarActions.sidebarOpen) {
     sideBarActions.toggle()
   }

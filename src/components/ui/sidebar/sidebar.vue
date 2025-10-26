@@ -3,7 +3,7 @@
     <transition name="sidebar" appear>
       <FwbSidebar v-show="sideBarActions.sidebarOpen" class="w-64 h-screen bg-white border-r sidebar side-bar-entry-header">
         <SidebarItem label="Início" icon="fas fa-house" :click="handleGoToHome" />
-        <SidebarItem label="Orçamentos" icon="fas fa-file-invoice-dollar" :click="handleGoToHome" />
+        <SidebarItem label="Orçamentos" icon="fas fa-file-invoice-dollar" :click="handleGoToBudget" />
         <SidebarItem label="Clientes" icon="fas fa-user" :click="handleGoToCustomer" />
         <!-- <SidebarDropItem label="Relacionamentos" icon="fas fa-users">
           <SidebarItem label="Clientes" :click="handleGoToCustomer" className="pl-10"/>
@@ -48,6 +48,13 @@ const handleGoToPayments = () => {
 
 const handleGoToHome = () => {
   router.push({ name: 'home' })
+  if (sideBarActions.sidebarOpen) {
+    sideBarActions.toggle()
+  }
+}
+
+const handleGoToBudget = () => {
+  router.push({ name: 'budget' })
   if (sideBarActions.sidebarOpen) {
     sideBarActions.toggle()
   }
