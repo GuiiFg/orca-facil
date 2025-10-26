@@ -23,7 +23,7 @@
             Guilherme Padovine
           </h5>
           <p class="font-normal text-gray-700 dark:text-gray-400 mb-4">
-            Desenvolvedor Fullstack
+            Dev. Fullstack
           </p>
           <p class="font-normal text-gray-700 dark:text-gray-400 mb-4">
             <a
@@ -53,10 +53,10 @@
               :src="Farias"
           />
           <h5 class="mb-2 mt-4 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Guilherme Farias
+            Guilherme Farias Garcia
           </h5>
           <p class="font-normal text-gray-700 dark:text-gray-400 mb-4">
-            Desenvolvedor Fullstack
+            Dev. Fullstack / Tech Lead
           </p>
           <p class="font-normal text-gray-700 dark:text-gray-400 mb-4">
             <a

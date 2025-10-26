@@ -106,6 +106,9 @@ import { ref, onMounted, toRaw } from 'vue'
 import FormHelpers from '@/helpers/formHelpers.js'
 import BudgetForm from './form'
 import BudgetData from '@/shared/models/budget'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const form = ref({ ...BudgetForm })
 const budgets = ref([])
@@ -169,14 +172,7 @@ onMounted(() => {
 
 const handleEdit = (budget) => {
   handleClear()
-  if (!budget || !budget.id) return
-  if (!data || !data.value) {
-    data = ref({ ...budget })
-  } else {
-    data.value = { ...budget }
-  }
-  showFormModal.value = true
-  FormHelpers.loadForm(form.value, data.value)
+  router.push({ name: 'budget-details', params: { id: budget.id } })
 }
 
 const handleSave = () => {
