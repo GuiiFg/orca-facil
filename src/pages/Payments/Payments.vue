@@ -19,44 +19,46 @@
           </div>
         </div>
       </template>
+      <template #body>
+        <Forms
+            title="Meios de Pagamento"
+            description="Cadastre e gerencie seus meios de pagamento."
+            icon="fas fa-credit-card"
+            :hasHeader="false"
+        >
+          <div>
+            <p class="font-normal text-gray-700 dark:text-gray-400">
+              Informações básicas
+            </p>
+          </div>
+          <div class="flex flex-row gap-5">
+            <div class="md:w-1/3">
+              <p class="font-medium text-gray-900 dark:text-white mb-2">Nome:</p>
+              <FwbInput
+                  type="text"
+                  placeholder="Digite o nome do meio de pagamento"
+                  v-model="form.name.value"
+                  :validation-status="form.name.status"
+                  :required="form.name.required">
+                <template #validationMessage>
+                  <span v-for="msg in form.name.errors" :key="msg">{{ msg }}</span>
+                </template>
+              </FwbInput>
+            </div>
+          </div>
+          <div class="flex flex-row gap-5 mt-4">
+            <div class="grow">
+              <p class="font-medium text-gray-900 dark:text-white mb-2">Descrição:</p>
+              <FwbTextarea
+                  v-model="form.description.value"
+                  :validation-status="form.description.status"
+                  :required="form.description.required"
+                  placeholder="Digite a descrição do produto ou serviço" />
+            </div>
+          </div>
+        </Forms>
+      </template>
     </FwbModal>
-    <Forms
-        title="Meios de Pagamento"
-        description="Cadastre e gerencie seus meios de pagamento."
-        icon="fas fa-credit-card"
-        :hasHeader="false"
-    >
-      <div>
-        <p class="font-normal text-gray-700 dark:text-gray-400">
-          Informações básicas
-        </p>
-      </div>
-      <div class="flex flex-row gap-5">
-        <div class="md:w-1/3">
-          <p class="font-medium text-gray-900 dark:text-white mb-2">Nome:</p>
-          <FwbInput
-              type="text"
-              placeholder="Digite o nome do meio de pagamento"
-              v-model="form.name.value"
-              :validation-status="form.name.status"
-              :required="form.name.required">
-            <template #validationMessage>
-              <span v-for="msg in form.name.errors" :key="msg">{{ msg }}</span>
-            </template>
-          </FwbInput>
-        </div>
-      </div>
-      <div class="flex flex-row gap-5 mt-4">
-        <div class="grow">
-          <p class="font-medium text-gray-900 dark:text-white mb-2">Descrição:</p>
-          <FwbTextarea
-              v-model="form.description.value"
-              :validation-status="form.description.status"
-              :required="form.description.required"
-              placeholder="Digite a descrição do produto ou serviço" />
-        </div>
-      </div>
-    </Forms>
     <Tables
         :columns="['Nome', 'Descrição', 'Ações']"
         :page="currentPage"

@@ -74,7 +74,6 @@
               <fwb-select
                   v-model="form.type.value"
                   :options="form.type.options"
-                  label="Selecione o tipo"
                   :required="form.type.required"
               />
             </div>
