@@ -24,6 +24,8 @@
             title="Meios de Pagamento"
             description="Cadastre e gerencie seus meios de pagamento."
             icon="fas fa-credit-card"
+            @form:save="handleSave"
+            @form:clear="handleClear"
             :hasHeader="false"
         >
           <div>
@@ -80,7 +82,7 @@
       <fwb-table-row v-else v-for="(payment, index) in payments" :key="payment.id">
         <TableColumn isText :value="payment.name" />
         <TableColumn isText :value="payment.description" />
-        <TableColumn isActions hasEdit hasDelete v-on:line:edit="onEdit(payment)" v-on:line:delete="onEdit(payment)" />
+        <TableColumn isActions hasEdit hasDelete v-on:line:edit="handleEdit(payment)" v-on:line:delete="handleDelete(payment)" />
       </fwb-table-row>
     </Tables>
   </div>
@@ -118,6 +120,7 @@ const handleSearch = async (query) => {
 }
 
 const handleSearchPayments = async () => {
+  console.log('window.api = ', window.api)
   const response = await window.api.payment.search(searchQuery.value, 5, currentPage.value)
   const { data, total, pages } = response
   payments.value = data

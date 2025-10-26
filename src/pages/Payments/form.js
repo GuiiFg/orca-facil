@@ -1,5 +1,13 @@
 export default {
-    id: null,
-    name: null,
-    description: null
+  name: {
+    value: null,
+    required: true,
+    status: null,
+    errors: []
+  },
+  description: {
+    value: null,
+    required: false,
+    status: null
+  }
 }

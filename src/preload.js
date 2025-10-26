@@ -16,5 +16,12 @@ contextBridge.exposeInMainWorld('api', {
     getById: (id) => ipcRenderer.invoke('db:getProductById', id),
     delete: (id) => ipcRenderer.invoke('db:deleteProduct', id),
     update: (data) => ipcRenderer.invoke('db:updateProduct', data),
+  },
+  payment: {
+    add: (data) => ipcRenderer.invoke('db:createPayment', data),
+    search: (value = null, limit = 5, index = 0) => ipcRenderer.invoke('db:listPayments', value, limit, index),
+    getById: (id) => ipcRenderer.invoke('db:getPaymentById', id),
+    delete: (id) => ipcRenderer.invoke('db:deletePayment', id),
+    update: (data) => ipcRenderer.invoke('db:updatePayment', data),
   }
 });

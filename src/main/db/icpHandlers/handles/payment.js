@@ -50,11 +50,11 @@ export function listPayments(searchValue = null, limit = 5, index = 1) {
     if (searchValue) {
         const likeValue = `%${searchValue}%`;
         stmt = db.prepare(query);
-        reponse.data = stmt.all(likeValue, likeValue, likeValue, limit, index * limit);
+        reponse.data = stmt.all(likeValue, likeValue, limit, index * limit);
         const countQuery = `SELECT COUNT(*) as count FROM payment
       WHERE active = 1 AND (code LIKE ? OR name LIKE )`;
         const countStmt = db.prepare(countQuery);
-        const countResult = countStmt.get(likeValue, likeValue, likeValue);
+        const countResult = countStmt.get(likeValue, likeValue);
         reponse.total = countResult.count;
         reponse.pages = Math.ceil(reponse.total / limit);
 
