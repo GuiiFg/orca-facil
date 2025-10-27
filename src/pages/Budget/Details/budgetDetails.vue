@@ -2,7 +2,7 @@
   <div class="p-3">
     <div>
       <FwbHeading tag="h4">
-        <FontAwesomeIcon icon="fas fa-file-invoice-dollar" /> Orçamento [NUM:BUDGET]
+        <FontAwesomeIcon icon="fas fa-file-invoice-dollar" /> Orçamento <span v-if="budget">{{ budget.code }}</span>
       </FwbHeading>
       <div>
         <p class="font-normal text-gray-700 dark:text-gray-400">
@@ -10,10 +10,181 @@
         </p>
       </div>
     </div>
+    <FwbAccordion flushed>
+      <FwbAccordionPanel show>
+        <FwbAccordionHeader>
+          <div class="flex justify-start items-start">
+            <div class="content-start">
+              <FontAwesomeIcon icon="fas fa-chart-simple" /> Valores
+            </div>
+          </div>
+        </FwbAccordionHeader>
+        <FwbAccordionContent>
+          <div>teste</div>
+        </FwbAccordionContent>
+      </FwbAccordionPanel>
+      <FwbAccordionPanel>
+        <FwbAccordionHeader>
+          <div class="flex justify-start items-start">
+            <div class="content-start">
+              <FontAwesomeIcon icon="fas fa-user" /> Cliente
+            </div>
+          </div>
+        </FwbAccordionHeader>
+        <FwbAccordionContent>
+          <div v-if="!customer">
+            <FwbButton>Selecionar cliente</FwbButton>
+          </div>
+          <div v-else>
+            <div class="flex flex-row gap-5">
+              <div class="grow">
+                <p class="font-medium text-gray-900 dark:text-white mb-2">Nome:</p>
+                <FwbInput type="text" disabled v-model="customer.name" />
+              </div>
+              <div class="grow">
+                <p class="font-medium text-gray-900 dark:text-white mb-2">Sobrenome:</p>
+                <FwbInput type="text" disabled v-model="customer.surname" />
+              </div>
+              <div class="grow">
+                <p class="font-medium text-gray-900 dark:text-white mb-2">Celular:</p>
+                <FwbInput type="text" disabled v-model="customer.cellphone" />
+              </div>
+            </div>
+            <div class="flex flex-row gap-5 mt-4">
+              <div class="grow">
+                <p class="font-medium text-gray-900 dark:text-white mb-2">Email:</p>
+                <FwbInput type="text" disabled v-model="customer.email" />
+              </div>
+              <div class="grow">
+                <p class="font-medium text-gray-900 dark:text-white mb-2">Cpf/Cnpj:</p>
+                <FwbInput type="text" disabled v-model="customer.document" />
+              </div>
+              <div class="grow">
+                <p class="font-medium text-gray-900 dark:text-white mb-2">Telefone:</p>
+                <FwbInput type="text" disabled v-model="customer.zipcode" />
+              </div>
+            </div>
+            <div class="flex flex-row gap-5 mt-4">
+              <div class="grow">
+                <p class="font-medium text-gray-900 dark:text-white mb-2">Cep:</p>
+                <FwbInput type="text" disabled v-model="customer.state" />
+              </div>
+              <div class="grow">
+                <p class="font-medium text-gray-900 dark:text-white mb-2">Estado:</p>
+                <FwbInput type="text" disabled v-model="customer.document" />
+              </div>
+              <div class="grow">
+                <p class="font-medium text-gray-900 dark:text-white mb-2">Município:</p>
+                <FwbInput type="text" disabled v-model="customer.city" />
+              </div>
+            </div>
+            <div class="flex flex-row gap-5 mt-4">
+              <div class="grow">
+                <p class="font-medium text-gray-900 dark:text-white mb-2">Bairro:</p>
+                <FwbInput type="text" disabled v-model="customer.district" />
+              </div>
+              <div class="grow">
+                <p class="font-medium text-gray-900 dark:text-white mb-2">Rua:</p>
+                <FwbInput type="text" disabled v-model="customer.street" />
+              </div>
+              <div class="grow">
+                <p class="font-medium text-gray-900 dark:text-white mb-2">Número:</p>
+                <FwbInput type="text" disabled v-model="customer.number" />
+              </div>
+            </div>
+          </div>
+        </FwbAccordionContent>
+      </FwbAccordionPanel>
+      <FwbAccordionPanel>
+        <FwbAccordionHeader>
+          <div class="flex justify-start items-start">
+            <div class="content-start">
+              <FontAwesomeIcon icon="fas fa-credit-card" /> Meio de Pagamento
+            </div>
+          </div>
+        </FwbAccordionHeader>
+        <FwbAccordionContent>
+          <div v-if="!payment">
+            <FwbButton>Selecionar meio de pagamento</FwbButton>
+          </div>
+          <div v-else>
+            <div class="flex flex-row gap-5">
+              <div class="grow">
+                <p class="font-medium text-gray-900 dark:text-white mb-2">Nome:</p>
+                <FwbInput type="text" disabled v-model="payment.name" />
+              </div>
+              <div class="grow">
+                <p class="font-medium text-gray-900 dark:text-white mb-2">Tipo:</p>
+                <FwbInput type="text" disabled v-model="payment.type" />
+              </div>
+              <div class="grow">
+                <p class="font-medium text-gray-900 dark:text-white mb-2">Descrição:</p>
+                <FwbInput type="text" disabled v-model="payment.description" />
+              </div>
+            </div>
+          </div>
+        </FwbAccordionContent>
+      </FwbAccordionPanel>
+    </FwbAccordion>
+    <Tables
+      class="w-full p-5 mt-4"
+      hasSearch
+      hasNew
+      hasReload
+      v-on:new="showBudgetItemModal = true"
+      :columns="['Código', 'Nome', 'Quantidade', 'Desconto', 'Preço Unitário', 'Preço Total', 'Custo Unitário', 'Custo Total', 'Ações']">
+      <fwb-table-row v-if="budgetItems.length === 0">
+        <td colspan="8" class="text-center py-4">
+          Nenhum produto ou serviço adicionado ao orçamento.
+        </td>
+      </fwb-table-row>
+    </Tables>
+    <BudgetItemModal v-if="showBudgetItemModal" @close="showBudgetItemModal = false" />
   </div>
 </template>
 
 <script setup>
-import { FwbHeading } from 'flowbite-vue'
+import {
+  FwbHeading, FwbInput, FwbButton, FwbAccordion, FwbAccordionPanel, FwbAccordionHeader, FwbAccordionContent,
+  FwbTableRow
+} from 'flowbite-vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { useRouter } from 'vue-router'
+import { onMounted, ref } from "vue";
+import Tables from '@/components/dataManagers/Tables/tables.vue'
+import BudgetItemModal from './modals/budgetItemModal.vue'
+
+const router = useRouter()
+
+const budgetId = router.currentRoute.value.params.id
+const budget = ref(null)
+const customer = ref(null)
+const payment = ref(null)
+const budgetItems = ref([])
+const showBudgetItemModal = ref(false)
+
+onMounted(async () => {
+  console.log('Loaded budget details page with ID:', budgetId)
+  if (!budgetId) {
+    await router.push({name: 'budget'})
+    return
+  }
+
+  await loadBudgetDetails()
+})
+
+const loadBudgetDetails = async () => {
+  const response = await window.api.budget.getById(budgetId)
+  budget.value = response.budget
+
+  if (budget.value.customer_id) {
+    const customerResponse = await window.api.customer.getById(budget.value.customer_id)
+    customer.value = customerResponse.customer
+  }
+  if (budget.value.payment_id) {
+    const paymentResponse = await window.api.payment.getById(budget.value.payment_id)
+    payment.value = paymentResponse.payment
+  }
+}
+
 </script>

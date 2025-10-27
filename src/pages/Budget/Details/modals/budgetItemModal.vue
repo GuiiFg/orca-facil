@@ -1,0 +1,209 @@
+<template>
+  <FwbModal @close="onCloseModal">
+    <template #header>
+      <div>
+        <FwbHeading tag="h4"><FontAwesomeIcon icon="fas fa-user" /> Item do orçamento</FwbHeading>
+        <div>
+          <p class="font-normal text-gray-700 dark:text-gray-400">
+            Adicione ou edite um item do orçamento.
+          </p>
+        </div>
+      </div>
+    </template>
+    <template #body>
+      <Forms title="Orçamentos" description="Cadastre e gerencie orçamentos." icon="fas fa-file-invoice-dollar"
+             @form:save="handleSave" @form:clear="handleClear" :hasHeader="false">
+        <div>
+          <p class="font-normal text-gray-700 dark:text-gray-400">
+            Informações básicas
+          </p>
+        </div>
+        <div class="flex flex-row gap-5 mt-4">
+          <div class="grow">
+            <p class="font-medium text-gray-900 dark:text-white mb-2">Produto/Serviço:</p>
+            <div class="auto-complete-fixer">
+              <FwbAutocomplete class="bg-white dark:bg-gray-800" type="text" placeholder="Digite para buscar um produto/serviço" v-model="form.product_id.value" :options="form.product_id.options"
+                               :validation-status="form.product_id.status" :required="form.product_id.required" display="list_name" @search="searchProducts" @update:modelValue="onSelectProduct">
+                <template #validationMessage>
+                  <span v-for="msg in form.product_id.errors" :key="msg">{{ msg }}</span>
+                </template>
+              </FwbAutocomplete>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-row gap-5 mt-4">
+          <div class="grow">
+            <p class="font-medium text-gray-900 dark:text-white mb-2">Quantidate:</p>
+            <FwbInput
+                type="number"
+                min="0"
+                placeholder="Digite a quantidade"
+                v-model="form.quantity.value"
+                :validation-status="form.quantity.status"
+                :required="form.quantity.required">
+              <template #prefix>
+                <span class="text-gray-500 dark:text-gray-400">UNs</span>
+              </template>
+            </FwbInput>
+          </div>
+        </div>
+        <div class="flex flex-row gap-5 mt-4">
+          <div class="grow">
+            <p class="font-medium text-gray-900 dark:text-white mb-2">Valor Unitário:</p>
+            <FwbInput
+                type="number"
+                min="0"
+                placeholder="Digite a quantidade"
+                v-model="form.unit_price.value"
+                :validation-status="form.unit_price.status"
+                :required="form.unit_price.required">
+              <template #prefix>
+                <span class="text-gray-500 dark:text-gray-400">R$</span>
+              </template>
+            </FwbInput>
+          </div>
+          <div class="grow">
+            <p class="font-medium text-gray-900 dark:text-white mb-2">Custo Unitário:</p>
+            <FwbInput
+                type="number"
+                min="0"
+                placeholder="Digite a quantidade"
+                v-model="form.unit_cost.value"
+                :validation-status="form.unit_cost.status"
+                :required="form.unit_cost.required">
+              <template #prefix>
+                <span class="text-gray-500 dark:text-gray-400">R$</span>
+              </template>
+            </FwbInput>
+          </div>
+        </div>
+        <div class="flex flex-row gap-5 mt-4">
+          <div class="grow">
+            <p class="font-medium text-gray-900 dark:text-white mb-2">Desconto:</p>
+            <FwbInput
+                type="number"
+                min="0"
+                max="100"
+                placeholder="Digite a quantidade"
+                v-model="form.discount.value"
+                :validation-status="form.discount.status"
+                :required="form.discount.required">
+              <template #prefix>
+                <span class="text-gray-500 dark:text-gray-400">%</span>
+              </template>
+            </FwbInput>
+          </div>
+        </div>
+        <div class="flex flex-row gap-5 mt-4">
+          <div class="grow">
+            <p class="font-medium text-gray-900 dark:text-white mb-2">Total:</p>
+            <FwbInput
+                type="number"
+                placeholder="Digite a quantidade"
+                disabled
+                v-model="finalValue">
+              <template #prefix>
+                <span class="text-gray-500 dark:text-gray-400">R$</span>
+              </template>
+            </FwbInput>
+          </div>
+        </div>
+      </Forms>
+    </template>
+  </FwbModal>
+</template>
+
+<script setup>
+import {FwbAutocomplete, FwbHeading, FwbInput, FwbModal} from 'flowbite-vue'
+import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import {onMounted, ref, computed} from "vue";
+import Forms from '@/components/dataManagers/Forms/forms.vue'
+import BudgetItemData from '@/shared/models/budgetItem.js'
+import BudgetItemForm from './budgetItemForm'
+import FormHelpers from '@/helpers/formHelpers.js'
+
+const form = ref({ ...BudgetItemForm })
+let data = ref(null)
+
+const emit = defineEmits(['close'])
+
+const onCloseModal = () => {
+  handleClear()
+  emit('close')
+}
+
+onMounted(() => {
+  handleClear()
+})
+
+const finalValue = computed(() => {
+  if (form.value.unit_price.value <= 0 || form.value.quantity.value <= 0) return 0
+  const total = form.value.unit_price.value * form.value.quantity.value
+  const discount = form.value.discount.value > 0 ? (total * (form.value.discount.value / 100)) : 0
+  return total - discount
+})
+
+const searchProducts = async (query) => {
+  if (!query || query.length < 2) {
+    form.value.product_id.options = []
+    return
+  }
+  const response = await window.api.product.search(query, 5, 0)
+  const { data } = response
+  if (data && data.length > 0) {
+    form.value.product_id.options = data.map(item => ({
+      id: item.id,
+      list_name: item.code + ' - ' + item.name + ' (' + (item.type === 0 ? 'Produto' : 'Serviço') + ')',
+      ...item
+    }))
+  }
+};
+
+const onSelectProduct = (selected) => {
+  console.log('selected', selected)
+  if (selected) {
+    form.value.unit_price.value = selected.amount || 0
+    form.value.unit_cost.value = selected.cost || 0
+  } else {
+    form.value.unit_price.value = 0
+    form.value.unit_cost.value = 0
+  }
+}
+
+const handleSave = async () => {
+  const isValid = FormHelpers.validateForm(form.value)
+  if (!isValid) return
+
+  if (data && data.value && data.value.id) {
+    FormHelpers.loadData(form.value, data.value)
+    handleUpdate()
+  } else {
+    data = ref({ ...ProductsData })
+    FormHelpers.loadData(form.value, data.value)
+    data.value.id = null
+    handleCreate()
+  }
+}
+
+const handleCreate = async () => {
+  // Create new budget item
+}
+
+const handleUpdate = async () => {
+  // Update existing budget item
+}
+
+const handleClear = () => {
+  data.value = null
+  data = ref(null)
+  FormHelpers.clearForm(form.value)
+}
+</script>
+
+<style scoped>
+.auto-complete-fixer .relative.w-full {
+  padding: 0px;
+  background-color: transparent;
+  border: none;
+}
+</style>
