@@ -19,7 +19,7 @@ export function updatePayment(paymentData) {
     const stmt = db.prepare(`
     UPDATE payment SET
       name = @name,
-      description = @description,
+      description = @description
     WHERE id = @id
   `);
     const info = stmt.run({ ...paymentData });
@@ -44,15 +44,15 @@ export function listPayments(searchValue = null, limit = 5, index = 1) {
 
     index = index > 0 ? index - 1 : 0;
     const query = `SELECT * FROM payment
-      WHERE active = 1 ` + (searchValue ? `AND (name LIKE ? OR description LIKE ? ) ` : '') + `
-      ORDER BY name
-      LIMIT ? OFFSET ?`;
+      WHERE active = 1 ` +
+      (searchValue ? `AND (name LIKE ? OR description LIKE ? ) ` : '') +
+      ` ORDER BY name LIMIT ? OFFSET ?`;
     if (searchValue) {
         const likeValue = `%${searchValue}%`;
         stmt = db.prepare(query);
         reponse.data = stmt.all(likeValue, likeValue, limit, index * limit);
         const countQuery = `SELECT COUNT(*) as count FROM payment
-      WHERE active = 1 AND (code LIKE ? OR name LIKE )`;
+      WHERE active = 1 AND (name LIKE ? OR description LIKE ? )`;
         const countStmt = db.prepare(countQuery);
         const countResult = countStmt.get(likeValue, likeValue);
         reponse.total = countResult.count;

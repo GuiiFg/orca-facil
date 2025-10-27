@@ -120,7 +120,6 @@ const handleSearch = async (query) => {
 }
 
 const handleSearchPayments = async () => {
-  console.log('window.api = ', window.api)
   const response = await window.api.payment.search(searchQuery.value, 5, currentPage.value)
   const { data, total, pages } = response
   payments.value = data
