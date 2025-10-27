@@ -1,9 +1,11 @@
 <template>
   <section class="relative bg-center bg-no-repeat bg-[url('https://www.ifinance.com.br/wp-content/uploads/2024/07/capas-de-blog-22.png')] bg-gray-700 bg-blend-multiply text-center py-28">
     <div class="px-4 mx-auto max-w-screen-md">
-      <h1 class="mb-4 text-4xl font-extrabold tracking-tight leading-none text-white md:text-5xl">
-        Sobre Nós
-      </h1>
+      <img
+          src="@/assets/logos/logo_name.svg"
+          alt="Orça Fácil"
+          class="mx-auto mb-6 w-64 sm:w-72 md:w-80"
+      />
       <p class="mb-8 text-lg font-normal text-gray-300 sm:px-16 lg:px-48">
         Tornamos a criação de orçamentos simples, rápida e profissional. O Orça Fácil foi criado para quem busca agilidade e praticidade no dia a dia.
       </p>

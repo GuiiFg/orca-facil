@@ -133,7 +133,9 @@
         <TableColumn isText :value="product.code" />
         <TableColumn isText :value="product.name" />
         <TableColumn isCustom >
-          <span class="capitalize">{{ product.type }}</span>
+          <fwb-badge v-if="product.type === 0">Produto</fwb-badge>
+          <fwb-badge v-else-if="product.type === 1">Serviço</fwb-badge>
+          <fwb-badge v-else>N/D</fwb-badge>
         </TableColumn>
         <TableColumn isMoney :value="product.amount ? product.amount.toString() : '0'" />
         <TableColumn isActions hasEdit hasDelete v-on:line:edit="handleEdit(product)" v-on:line:delete="handleDelete(product)" />
@@ -143,7 +145,7 @@
 </template>
 
 <script setup>
-import {FwbSelect, FwbInput, FwbTableRow, FwbTextarea, FwbHeading, FwbModal} from 'flowbite-vue'
+import {FwbSelect, FwbInput, FwbTableRow, FwbTextarea, FwbHeading, FwbModal, FwbBadge} from 'flowbite-vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import Forms from '@/components/dataManagers/Forms/forms.vue'
 import Tables from '@/components/dataManagers/Tables/tables.vue'
