@@ -23,7 +23,8 @@
             <p class="font-medium text-gray-900 dark:text-white mb-2">Produto/Serviço:</p>
             <div class="auto-complete-fixer">
               <FwbAutocomplete class="bg-white dark:bg-gray-800" type="text" placeholder="Digite para buscar um produto/serviço" v-model="form.product_id.value" :options="form.product_id.options"
-                               :validation-status="form.product_id.status" :required="form.product_id.required" display="list_name" @search="searchProducts" @update:modelValue="onSelectProduct">
+                               :validation-status="form.product_id.status" :required="form.product_id.required" display="list_name" @search="searchProducts" @update:modelValue="onSelectProduct"
+                               :disabled="isEditing === true">
                 <template #validationMessage>
                   <span v-for="msg in form.product_id.errors" :key="msg">{{ msg }}</span>
                 </template>
@@ -124,6 +125,7 @@ import FormHelpers from '@/helpers/formHelpers.js'
 
 const form = ref({ ...BudgetItemForm })
 let data = ref(null)
+const isEditing = ref(false)
 
 const emit = defineEmits(['close', 'item:create', 'item:update'])
 
@@ -134,6 +136,29 @@ const onCloseModal = () => {
 
 onMounted(() => {
   handleClear()
+})
+
+const handleEditItem = async (item_id) => {
+  handleClear()
+  const response = await window.api.budgetItem.getById(item_id)
+  const { budgetItem } = response
+  FormHelpers.loadForm(form.value, budgetItem)
+  data = ref({ ...budgetItem })
+
+  const prodResponse = await window.api.product.getById(budgetItem.product_id)
+  const { product } = prodResponse
+  const p = {
+    id: product.id,
+    list_name: product.code + ' - ' + product.name + ' (' + (product.type === 0 ? 'Produto' : 'Serviço') + ')',
+    ...product
+  }
+  form.value.product_id.options = [p]
+  form.value.product_id.value = p
+  isEditing.value = true
+}
+
+defineExpose({
+  handleEditItem
 })
 
 const finalValue = computed(() => {
@@ -167,6 +192,8 @@ const onSelectProduct = (selected) => {
     form.value.unit_price.value = 0
     form.value.unit_cost.value = 0
   }
+  form.value.quantity.value = 1
+  form.value.discount.value = 0
 }
 
 const handleSave = async () => {
@@ -190,11 +217,13 @@ const handleSave = async () => {
 const handleCreate = async () => {
   const value = JSON.parse(JSON.stringify(toRaw(data.value)))
   emit('item:create', value)
+  onCloseModal()
 }
 
 const handleUpdate = async () => {
   const value = JSON.parse(JSON.stringify(toRaw(data.value)))
   emit('item:update', value)
+  onCloseModal()
 }
 
 const handleClear = () => {

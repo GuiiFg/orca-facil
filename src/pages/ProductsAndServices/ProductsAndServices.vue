@@ -133,9 +133,9 @@
         <TableColumn isText :value="product.code" />
         <TableColumn isText :value="product.name" />
         <TableColumn isCustom >
-          <fwb-badge v-if="product.type === 0">Produto</fwb-badge>
-          <fwb-badge v-else-if="product.type === 1">Serviço</fwb-badge>
-          <fwb-badge v-else>N/D</fwb-badge>
+          <fwb-badge v-if="product.type === 0" class="w-min">Produto</fwb-badge>
+          <fwb-badge v-else-if="product.type === 1" type="pink" class="w-min">Serviço</fwb-badge>
+          <fwb-badge v-else class="w-min" type="dark">N/D</fwb-badge>
         </TableColumn>
         <TableColumn isMoney :value="product.amount ? product.amount.toString() : '0'" />
         <TableColumn isActions hasEdit hasDelete v-on:line:edit="handleEdit(product)" v-on:line:delete="handleDelete(product)" />

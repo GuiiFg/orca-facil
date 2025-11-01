@@ -34,7 +34,7 @@ contextBridge.exposeInMainWorld('api', {
   },
   budgetItem: {
     add: (data) => ipcRenderer.invoke('db:createBudgetItem', data),
-    search: (value = null, limit = 5, index = 0) => ipcRenderer.invoke('db:listBudgetItems', value, limit, index),
+    search: (filters = null, limit = 5, index = 0) => ipcRenderer.invoke('db:listBudgetItems', filters, limit, index),
     getById: (id) => ipcRenderer.invoke('db:getBudgetItemById', id),
     delete: (id) => ipcRenderer.invoke('db:deleteBudgetItem', id),
     update: (data) => ipcRenderer.invoke('db:updateBudgetItem', data)

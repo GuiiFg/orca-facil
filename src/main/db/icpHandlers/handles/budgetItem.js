@@ -2,6 +2,10 @@ import { ipcMain } from 'electron';
 import db from '../../index.js';
 
 export function createBudgetItem(budgetItemData) {
+  if (!budgetItemData.discount)
+    budgetItemData.discount = 0;
+  if (!budgetItemData.unit_cost)
+    budgetItemData.unit_cost = 0;
   const stmt = db.prepare(`
   INSERT INTO budget_item (budget_id, product_id, quantity, unit_price, unit_cost, discount)
   VALUES (@budget_id, @product_id, @quantity, @unit_price, @unit_cost, @discount)`);
@@ -34,7 +38,7 @@ export function deleteBudgetItem(id) {
   return info.changes > 0;
 }
 
-export function listBudgetItems(searchValue = null, limit = 5, index = 1) {
+export function listBudgetItems(filters = null, limit = 5, index = 1) {
   let stmt;
   const reponse = {
     data: [],
@@ -42,6 +46,8 @@ export function listBudgetItems(searchValue = null, limit = 5, index = 1) {
     pages: 0,
     currentPage: index
   }
+
+  if (!filters) filters = { };
 
   index = index > 0 ? index - 1 : 0;
   const query = `
@@ -60,32 +66,35 @@ export function listBudgetItems(searchValue = null, limit = 5, index = 1) {
     FROM budget_item bi
     LEFT JOIN product p ON bi.product_id = p.id
     WHERE bi.active = 1 ` +
-    (searchValue ? `AND (p.code LIKE ? OR p.name LIKE ? ) ` : '') +
+    (filters.search ? `AND (p.code LIKE ? OR p.name LIKE ? ) ` : '') +
+    (filters.budget_id ? `AND bi.budget_id = ? ` : '') +
     ` ORDER BY p.code LIMIT ? OFFSET ?`;
-  if (searchValue) {
-    const likeValue = `%${searchValue}%`;
+  if (filters.search) {
+    const likeValue = `%${filters.search}%`;
     stmt = db.prepare(query);
-    reponse.data = stmt.all(likeValue, likeValue, limit, index * limit);
+    reponse.data = filters.budget_id ? stmt.all(likeValue, likeValue, filters.budget_id, limit, index * limit) : stmt.all(likeValue, likeValue, limit, index * limit);
     const countQuery = `
       SELECT COUNT(*) as count
       FROM budget_item bi
       LEFT JOIN product p ON bi.product_id = p.id
-      WHERE bi.active = 1 AND (p.code LIKE ? OR p.name LIKE ? )`;
+      WHERE bi.active = 1 AND (p.code LIKE ? OR p.name LIKE ? )` +
+      (filters.budget_id ? `AND bi.budget_id = ? ` : '');
     const countStmt = db.prepare(countQuery);
-    const countResult = countStmt.get(likeValue, likeValue);
+    const countResult = filters.budget_id ? countStmt.get(likeValue, likeValue, filters.budget_id) : countStmt.get(likeValue, likeValue);
     reponse.total = countResult.count;
     reponse.pages = Math.ceil(reponse.total / limit);
     return reponse;
   } else {
     stmt = db.prepare(query);
-    reponse.data = stmt.all(limit, index * limit);
+    reponse.data = filters.budget_id ? stmt.all(filters.budget_id, limit, index * limit) : stmt.all(limit, index * limit);
     const countQuery = `
       SELECT COUNT(*) as count
       FROM budget_item bi
       LEFT JOIN product p ON bi.product_id = p.id
-      WHERE bi.active = 1`;
+      WHERE bi.active = 1 ` +
+      (filters.budget_id ? `AND bi.budget_id = ? ` : '');
     const countStmt = db.prepare(countQuery);
-    const countResult = countStmt.get();
+    const countResult = filters.budget_id ? countStmt.get(filters.budget_id) : countStmt.get();
     reponse.total = countResult.count;
     reponse.pages = Math.ceil(reponse.total / limit);
     return reponse;

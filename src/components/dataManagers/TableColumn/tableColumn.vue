@@ -1,6 +1,7 @@
 <template>
-  <fwb-table-cell v-if="props.isText">{{ props.value }}</fwb-table-cell>
+  <fwb-table-cell v-if="props.isText">{{ props.value ? props.value : 'N/D' }}</fwb-table-cell>
   <fwb-table-cell v-if="props.isMoney">{{ formatMoney(props.value) }}</fwb-table-cell>
+  <fwb-table-cell v-if="props.isPercent">{{ formatPercent(props.value) }}</fwb-table-cell>
   <fwb-table-cell v-if="props.isActions">
     <FontAwesomeIcon v-if="props.hasEdit" icon="fas fa-edit" class="ml-3 text-blue-400" style="cursor: pointer;" @click="handleEmit('line:edit')" />
     <FontAwesomeIcon v-if="props.hasDelete" icon="fas fa-trash" class="ml-3 text-red-400" style="cursor: pointer;" @click="handleEmit('line:delete')" />
@@ -33,6 +34,11 @@ const props = defineProps({
     required: false,
     default: false
   },
+  isPercent: {
+    type: Boolean,
+    required: false,
+    default: false
+  },
   isActions: {
     type: Boolean,
     required: false,
@@ -61,9 +67,18 @@ const props = defineProps({
 })
 
 const formatMoney = (value) => {
-  if (!value) return ''
+  if (value === null || value === undefined) value = '0'
   let stringValue = value.toString()
   const numberValue = parseFloat(stringValue.replace(/[^0-9.-]+/g,""))
   return numberValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+const formatPercent = (value) => {
+  if (value === null || value === undefined) value = '0'
+  let stringValue = value.toString()
+  const dividedValue = parseFloat(stringValue.replace(/[^0-9.-]+/g,"")) / 100
+  stringValue = dividedValue.toString()
+  const numberValue = parseFloat(stringValue.replace(/[^0-9.-]+/g,""))
+  return numberValue.toLocaleString('pt-BR', { style: 'percent', minimumFractionDigits: 2 });
 }
 </script>

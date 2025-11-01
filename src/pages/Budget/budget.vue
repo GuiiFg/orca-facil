@@ -35,7 +35,7 @@
             <div class="grow">
               <p class="font-medium text-gray-900 dark:text-white mb-2">Código:</p>
               <FwbInput type="text" placeholder="Digite o código do orçamento" v-model="form.code.value"
-                :validation-status="form.code.status" :required="form.code.required">
+                :validation-status="form.code.status" :required="form.code.required" disabled>
                 <template #validationMessage>
                   <span v-for="msg in form.code.errors" :key="msg">{{ msg }}</span>
                 </template>
@@ -76,10 +76,10 @@
     </FwbModal>
     <Tables v-if="budgets" :columns="['Código', 'Cliente', 'Pagamento', 'Valor', 'Custo', 'Simulado', 'Ações']" :page="currentPage"
       :totalPages="totalPages" :total="totalItems" v-on:update:page="handleUpdatePage" v-on:search="handleSearch"
-      v-on:reload="handleSearchBudgets" v-on:new="showFormModal = true" hasSearch hasNew hasReload
+      v-on:reload="handleSearchBudgets" v-on:new="onCreateNewBudget" hasSearch hasNew hasReload
       class="w-full p-5 mt-4">
       <fwb-table-row v-if="budgets.length === 0">
-        <td colspan="5" class="text-center py-4">
+        <td colspan="7" class="text-center py-4">
           Nenhum dado encontrado.
         </td>
       </fwb-table-row>
@@ -139,6 +139,12 @@ const handleSearchBudgets = async () => {
   totalItems.value = total
 }
 
+const generateNextCode = async () => {
+  const response = await window.api.budget.search(null, 1, 1)
+  const { total } = response
+  return 'ORC-' + String(total + 1).padStart(6, '0')
+}
+
 const searchCustomers = async (query) => {
   if (!query || query.length < 3) {
     form.value.customer_id.options = []
@@ -169,6 +175,12 @@ onMounted(() => {
   totalPages.value = 1
   handleSearchBudgets()
 })
+
+const onCreateNewBudget = async () => {
+  handleClear()
+  form.value.code.value = await generateNextCode()
+  showFormModal.value = true
+}
 
 const handleEdit = (budget) => {
   handleClear()

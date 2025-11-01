@@ -19,8 +19,29 @@
             </div>
           </div>
         </FwbAccordionHeader>
-        <FwbAccordionContent>
-          <div>teste</div>
+          <FwbAccordionContent>
+          <div>
+            <div class="flex justify-center items-center gap-10 mb-2" v-if="budget">
+              <FwbHeading tag="h3" class="w-min">
+                <div class="flex justify-center items-center gap-2 text-blue-400">
+                  <FontAwesomeIcon icon="fas fa-arrow-up" />
+                  <span>{{ formatMoney(budget.total_price) }}</span>
+                </div>
+              </FwbHeading>
+              <FwbHeading tag="h3" class="w-min">
+                <div class="flex justify-center items-center gap-2 text-red-400">
+                  <FontAwesomeIcon icon="fas fa-arrow-down" />
+                  <span>{{ formatMoney(budget.total_cost) }}</span>
+                </div>
+              </FwbHeading>
+              <FwbHeading tag="h3" class="w-min">
+                <div class="flex justify-center items-center gap-2 text-green-400">
+                  <FontAwesomeIcon icon="fas fa-plus" />
+                  <span>{{ formatMoney(budget.total_price - budget.total_cost) }}</span>
+                </div>
+              </FwbHeading>
+            </div>
+          </div>
         </FwbAccordionContent>
       </FwbAccordionPanel>
       <FwbAccordionPanel>
@@ -129,9 +150,9 @@
       hasReload
       v-on:search="handleSearch"
       v-on:new="showBudgetItemModal = true"
-      :columns="['Código', 'Nome', 'Quantidade', 'Desconto', 'Preço Unitário', 'Preço Total', 'Custo Unitário', 'Custo Total', 'Ações']">
+      :columns="['Código', 'Nome', 'Qtde.', 'Desconto', 'Preço Unit.', 'Preço Total', 'Custo Unit.', 'Custo Total', 'Ações']">
       <fwb-table-row v-if="budgetItems.length === 0">
-        <td colspan="8" class="text-center py-4">
+        <td colspan="9" class="text-center py-4">
           Nenhum produto ou serviço adicionado ao orçamento.
         </td>
       </fwb-table-row>
@@ -139,15 +160,15 @@
         <TableColumn isText :value="item.product_code" />
         <TableColumn isText :value="item.product_name" />
         <TableColumn isText :value="item.quantity" />
-        <TableColumn isText :value="item.discount" />
+        <TableColumn isPercent :value="item.discount" />
         <TableColumn isMoney :value="item.unit_price" />
         <TableColumn isMoney :value="item.total_price" />
-        <TableColumn isMoney :value="item.unit_cost" />
-        <TableColumn isMoney :value="(item.unit_price * item.quantity) * (1 - (item.discount / 100))" />
+        <TableColumn isMoney :value="item.unit_cost || 0" />
+        <TableColumn isMoney :value="(item.unit_cost * item.quantity) * (1 - (item.discount / 100))" />
         <TableColumn isActions hasEdit hasDelete v-on:line:edit="handleEditItem(item.id)" v-on:line:delete="handleDeleteItem(item.id)" />
       </fwb-table-row>
     </Tables>
-    <BudgetItemModal v-if="showBudgetItemModal" @close="showBudgetItemModal = false" @item:create="handleCreateItem" @item:update="handleUpdateItem"/>
+    <BudgetItemModal ref="modalItemRef" v-if="showBudgetItemModal" @close="showBudgetItemModal = false" @item:create="handleCreateItem" @item:update="handleUpdateItem"/>
   </div>
 </template>
 
@@ -158,7 +179,7 @@ import {
 } from 'flowbite-vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { useRouter } from 'vue-router'
-import { onMounted, ref } from "vue";
+import { nextTick, onMounted, ref } from "vue";
 import TableColumn from '@/components/dataManagers/TableColumn/tableColumn.vue'
 import Tables from '@/components/dataManagers/Tables/tables.vue'
 import BudgetItemModal from './modals/budgetItemModal.vue'
@@ -175,6 +196,8 @@ const currentPage = ref(1)
 const totalPages = ref(1)
 const totalItems = ref(0)
 const searchQuery = ref(null)
+
+const modalItemRef = ref(null)
 
 onMounted(async () => {
   if (!budgetId) {
@@ -207,7 +230,11 @@ const handleSearch = async (query) => {
 }
 
 const handleSearchBudgetItems = async () => {
-  const response = await window.api.budgetItem.search(searchQuery.value, 5, currentPage.value)
+  const filters = {
+    budget_id: budgetId,
+    search: searchQuery.value
+  }
+  const response = await window.api.budgetItem.search(filters, 5, currentPage.value)
   const { data, total, pages } = response
   budgetItems.value = data
   totalPages.value = pages
@@ -218,7 +245,6 @@ const handleCreateItem = async (itemData) => {
   itemData.budget_id = budgetId
   await window.api.budgetItem.add(itemData)
   await window.api.budget.updateTotals(budgetId)
-  this.showBudgetItemModal.value = false
   await loadBudgetDetails()
 }
 
@@ -226,16 +252,30 @@ const handleUpdateItem = async (itemData) => {
   itemData.budget_id = budgetId
   await window.api.budgetItem.update(itemData)
   await window.api.budget.updateTotals(budgetId)
-  this.showBudgetItemModal.value = false
   await loadBudgetDetails()
 }
 
 const handleEditItem = async (itemId) => {
-  console.log('Edit item with ID:', itemId)
+  showBudgetItemModal.value = true
+  nextTick(() => {
+    console.log(modalItemRef.value)
+    if (modalItemRef.value && modalItemRef.value.handleEditItem) {
+      modalItemRef.value.handleEditItem(itemId)
+    }
+  })
 }
 
 const handleDeleteItem = async (itemId) => {
-  console.log('Delete item with ID:', itemId)
+  await window.api.budgetItem.delete(itemId)
+  await window.api.budget.updateTotals(budgetId)
+  await loadBudgetDetails()
+}
+
+const formatMoney = (value) => {
+  if (value === null || value === undefined) value = '0'
+  let stringValue = value.toString()
+  const numberValue = parseFloat(stringValue.replace(/[^0-9.-]+/g,""))
+  return numberValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
 </script>

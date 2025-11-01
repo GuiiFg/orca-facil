@@ -20,6 +20,7 @@ export function updateBudget(budgetData) {
     code = @code,
     customer_id = @customer_id,
     payment_id = @payment_id,
+    installments = @installments,
     notes = @notes
   WHERE id = @id`);
   const info = stmt.run({ ...budgetData });
@@ -43,6 +44,11 @@ export function updateBudgetTotals(budget_id) {
 
   const total_price =
     itemsTotals.total_items_price * (1 - (budget.general_discount / 100.0));
+
+  if (!itemsTotals.total_cost || itemsTotals.total_cost <=0)
+    itemsTotals.total_cost = 0;
+  if (!itemsTotals.total_items_price || itemsTotals.total_items_price <=0)
+    itemsTotals.total_items_price = 0;
 
   db.prepare(`
     UPDATE budget
