@@ -28,7 +28,7 @@ function validateForm(form) {
     }
   }
 
-  if (validationResults) console.log('Validation Results:', validationResults);
+  if (validationResults) console.error('Validation Results:', validationResults);
   return validationResults === null;
 }
 

@@ -35,7 +35,7 @@ export function runMigrations() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       active INTEGER DEFAULT 1
     );
- `).run();
+  `).run();
 
   db.prepare(`
     CREATE TABLE IF NOT EXISTS payment (
@@ -45,7 +45,7 @@ export function runMigrations() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       active INTEGER DEFAULT 1
     );
- `).run();
+  `).run();
 
   db.prepare(`
     CREATE TABLE IF NOT EXISTS budget (
@@ -54,8 +54,26 @@ export function runMigrations() {
       customer_id INTEGER NULL,
       payment_id INTEGER NULL,
       notes TEXT NULL,
+      discount REAL NULL,
+      total_cost REAL NULL,
+      total_price REAL NULL,
+      installments INTEGER NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       active INTEGER DEFAULT 1
     );
- `).run();
+  `).run();
+
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS budget_item (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      budget_id INTEGER NOT NULL,
+      product_id INTEGER NOT NULL,
+      quantity INTEGER NOT NULL,
+      unit_price REAL NOT NULL,
+      unit_cost REAL NOT NULL,
+      discount REAL NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      active INTEGER DEFAULT 1
+    );
+  `).run();
 }

@@ -19,5 +19,3 @@ export default defineConfig({
     },
   },
 });
-
-console.log('Database path:', path.resolve(__dirname, 'src', 'data', 'database.db'));

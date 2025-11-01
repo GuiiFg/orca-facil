@@ -49,7 +49,7 @@ const props = defineProps({
     default: false
   },
   value: {
-    type: String,
+    type: [String, Number],
     required: false,
     default: ''
   },
@@ -62,7 +62,8 @@ const props = defineProps({
 
 const formatMoney = (value) => {
   if (!value) return ''
-  const numberValue = parseFloat(value.replace(/[^0-9.-]+/g,""))
-  return numberValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+  let stringValue = value.toString()
+  const numberValue = parseFloat(stringValue.replace(/[^0-9.-]+/g,""))
+  return numberValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 </script>

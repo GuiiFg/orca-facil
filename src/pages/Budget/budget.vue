@@ -74,7 +74,7 @@
         </Forms>
       </template>
     </FwbModal>
-    <Tables v-if="budgets" :columns="['Código', 'Cliente', 'Pagamento', 'Valor', 'Custo', 'Ações']" :page="currentPage"
+    <Tables v-if="budgets" :columns="['Código', 'Cliente', 'Pagamento', 'Valor', 'Custo', 'Simulado', 'Ações']" :page="currentPage"
       :totalPages="totalPages" :total="totalItems" v-on:update:page="handleUpdatePage" v-on:search="handleSearch"
       v-on:reload="handleSearchBudgets" v-on:new="showFormModal = true" hasSearch hasNew hasReload
       class="w-full p-5 mt-4">
@@ -87,8 +87,9 @@
         <TableColumn isText :value="budget.code" />
         <TableColumn isText :value="budget.customer_name" />
         <TableColumn isText :value="budget.payment_name" />
-        <TableColumn isMoney :value="budget.value ? budget.value.toString() : '0'" />
-        <TableColumn isMoney :value="budget.cost ? budget.cost.toString() : '0'" />
+        <TableColumn isMoney :value="budget.total_price" />
+        <TableColumn isMoney :value="budget.total_cost" />
+        <TableColumn isMoney :value="budget.total_price - budget.total_cost" />
         <TableColumn isActions hasEdit hasDelete v-on:line:edit="handleEdit(budget)"
           v-on:line:delete="handleDelete(budget)" />
       </fwb-table-row>
@@ -133,7 +134,6 @@ const handleSearch = async (query) => {
 const handleSearchBudgets = async () => {
   const response = await window.api.budget.search(searchQuery.value, 5, currentPage.value)
   const { data, total, pages } = response
-  console.log('response', data)
   budgets.value = data
   totalPages.value = pages
   totalItems.value = total

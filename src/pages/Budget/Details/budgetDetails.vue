@@ -114,10 +114,6 @@
                 <FwbInput type="text" disabled v-model="payment.name" />
               </div>
               <div class="grow">
-                <p class="font-medium text-gray-900 dark:text-white mb-2">Tipo:</p>
-                <FwbInput type="text" disabled v-model="payment.type" />
-              </div>
-              <div class="grow">
                 <p class="font-medium text-gray-900 dark:text-white mb-2">Descrição:</p>
                 <FwbInput type="text" disabled v-model="payment.description" />
               </div>
@@ -131,6 +127,7 @@
       hasSearch
       hasNew
       hasReload
+      v-on:search="handleSearch"
       v-on:new="showBudgetItemModal = true"
       :columns="['Código', 'Nome', 'Quantidade', 'Desconto', 'Preço Unitário', 'Preço Total', 'Custo Unitário', 'Custo Total', 'Ações']">
       <fwb-table-row v-if="budgetItems.length === 0">
@@ -138,8 +135,19 @@
           Nenhum produto ou serviço adicionado ao orçamento.
         </td>
       </fwb-table-row>
+      <fwb-table-row v-else v-for="(item, index) in budgetItems" :key="item.id">
+        <TableColumn isText :value="item.product_code" />
+        <TableColumn isText :value="item.product_name" />
+        <TableColumn isText :value="item.quantity" />
+        <TableColumn isText :value="item.discount" />
+        <TableColumn isMoney :value="item.unit_price" />
+        <TableColumn isMoney :value="item.total_price" />
+        <TableColumn isMoney :value="item.unit_cost" />
+        <TableColumn isMoney :value="(item.unit_price * item.quantity) * (1 - (item.discount / 100))" />
+        <TableColumn isActions hasEdit hasDelete v-on:line:edit="handleEditItem(item.id)" v-on:line:delete="handleDeleteItem(item.id)" />
+      </fwb-table-row>
     </Tables>
-    <BudgetItemModal v-if="showBudgetItemModal" @close="showBudgetItemModal = false" />
+    <BudgetItemModal v-if="showBudgetItemModal" @close="showBudgetItemModal = false" @item:create="handleCreateItem" @item:update="handleUpdateItem"/>
   </div>
 </template>
 
@@ -151,6 +159,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { useRouter } from 'vue-router'
 import { onMounted, ref } from "vue";
+import TableColumn from '@/components/dataManagers/TableColumn/tableColumn.vue'
 import Tables from '@/components/dataManagers/Tables/tables.vue'
 import BudgetItemModal from './modals/budgetItemModal.vue'
 
@@ -160,11 +169,14 @@ const budgetId = router.currentRoute.value.params.id
 const budget = ref(null)
 const customer = ref(null)
 const payment = ref(null)
-const budgetItems = ref([])
 const showBudgetItemModal = ref(false)
+const budgetItems = ref([])
+const currentPage = ref(1)
+const totalPages = ref(1)
+const totalItems = ref(0)
+const searchQuery = ref(null)
 
 onMounted(async () => {
-  console.log('Loaded budget details page with ID:', budgetId)
   if (!budgetId) {
     await router.push({name: 'budget'})
     return
@@ -185,6 +197,45 @@ const loadBudgetDetails = async () => {
     const paymentResponse = await window.api.payment.getById(budget.value.payment_id)
     payment.value = paymentResponse.payment
   }
+
+  await handleSearchBudgetItems()
+}
+
+const handleSearch = async (query) => {
+  searchQuery.value = query
+  await handleSearchBudgetItems()
+}
+
+const handleSearchBudgetItems = async () => {
+  const response = await window.api.budgetItem.search(searchQuery.value, 5, currentPage.value)
+  const { data, total, pages } = response
+  budgetItems.value = data
+  totalPages.value = pages
+  totalItems.value = total
+}
+
+const handleCreateItem = async (itemData) => {
+  itemData.budget_id = budgetId
+  await window.api.budgetItem.add(itemData)
+  await window.api.budget.updateTotals(budgetId)
+  this.showBudgetItemModal.value = false
+  await loadBudgetDetails()
+}
+
+const handleUpdateItem = async (itemData) => {
+  itemData.budget_id = budgetId
+  await window.api.budgetItem.update(itemData)
+  await window.api.budget.updateTotals(budgetId)
+  this.showBudgetItemModal.value = false
+  await loadBudgetDetails()
+}
+
+const handleEditItem = async (itemId) => {
+  console.log('Edit item with ID:', itemId)
+}
+
+const handleDeleteItem = async (itemId) => {
+  console.log('Delete item with ID:', itemId)
 }
 
 </script>

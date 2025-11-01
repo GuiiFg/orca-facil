@@ -29,6 +29,14 @@ contextBridge.exposeInMainWorld('api', {
     search: (value = null, limit = 5, index = 0) => ipcRenderer.invoke('db:listBudgets', value, limit, index),
     getById: (id) => ipcRenderer.invoke('db:getBudgetById', id),
     delete: (id) => ipcRenderer.invoke('db:deleteBudget', id),
-    update: (data) => ipcRenderer.invoke('db:updateBudget', data)
+    update: (data) => ipcRenderer.invoke('db:updateBudget', data),
+    updateTotals: (budget_id) => ipcRenderer.invoke('db:updateBudgetTotals', budget_id)
+  },
+  budgetItem: {
+    add: (data) => ipcRenderer.invoke('db:createBudgetItem', data),
+    search: (value = null, limit = 5, index = 0) => ipcRenderer.invoke('db:listBudgetItems', value, limit, index),
+    getById: (id) => ipcRenderer.invoke('db:getBudgetItemById', id),
+    delete: (id) => ipcRenderer.invoke('db:deleteBudgetItem', id),
+    update: (data) => ipcRenderer.invoke('db:updateBudgetItem', data)
   }
 });

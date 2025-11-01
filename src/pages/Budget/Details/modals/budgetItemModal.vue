@@ -116,7 +116,7 @@
 <script setup>
 import {FwbAutocomplete, FwbHeading, FwbInput, FwbModal} from 'flowbite-vue'
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {onMounted, ref, computed} from "vue";
+import {onMounted, ref, computed, toRaw} from "vue";
 import Forms from '@/components/dataManagers/Forms/forms.vue'
 import BudgetItemData from '@/shared/models/budgetItem.js'
 import BudgetItemForm from './budgetItemForm'
@@ -125,7 +125,7 @@ import FormHelpers from '@/helpers/formHelpers.js'
 const form = ref({ ...BudgetItemForm })
 let data = ref(null)
 
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'item:create', 'item:update'])
 
 const onCloseModal = () => {
   handleClear()
@@ -160,7 +160,6 @@ const searchProducts = async (query) => {
 };
 
 const onSelectProduct = (selected) => {
-  console.log('selected', selected)
   if (selected) {
     form.value.unit_price.value = selected.amount || 0
     form.value.unit_cost.value = selected.cost || 0
@@ -171,26 +170,31 @@ const onSelectProduct = (selected) => {
 }
 
 const handleSave = async () => {
-  const isValid = FormHelpers.validateForm(form.value)
+  const finalForm = ref(JSON.parse(JSON.stringify(toRaw(form.value))))
+  if (form.value.product_id.value) finalForm.value.product_id.value = form.value.product_id.value.id
+
+  const isValid = FormHelpers.validateForm(finalForm.value)
   if (!isValid) return
 
   if (data && data.value && data.value.id) {
-    FormHelpers.loadData(form.value, data.value)
+    FormHelpers.loadData(finalForm.value, data.value)
     handleUpdate()
   } else {
-    data = ref({ ...ProductsData })
-    FormHelpers.loadData(form.value, data.value)
+    data = ref({ ...BudgetItemData })
+    FormHelpers.loadData(finalForm.value, data.value)
     data.value.id = null
     handleCreate()
   }
 }
 
 const handleCreate = async () => {
-  // Create new budget item
+  const value = JSON.parse(JSON.stringify(toRaw(data.value)))
+  emit('item:create', value)
 }
 
 const handleUpdate = async () => {
-  // Update existing budget item
+  const value = JSON.parse(JSON.stringify(toRaw(data.value)))
+  emit('item:update', value)
 }
 
 const handleClear = () => {

@@ -3,8 +3,8 @@ import db from '../../index.js';
 
 export function createBudget(budgetData) {
   const stmt = db.prepare(`
-  INSERT INTO budget (code, customer_id, payment_id, notes)
-  VALUES (@code, @customer_id, @payment_id, @notes)`);
+  INSERT INTO budget (code, customer_id, payment_id, notes, discount, total_cost, total_price, installments)
+  VALUES (@code, @customer_id, @payment_id, @notes, 0, 0, 0, 1)`);
   const info = stmt.run(budgetData);
   return info.lastInsertRowid;
 }
@@ -24,6 +24,39 @@ export function updateBudget(budgetData) {
   WHERE id = @id`);
   const info = stmt.run({ ...budgetData });
   return info.changes > 0;
+}
+
+export function updateBudgetTotals(budget_id) {
+  const budget = db.prepare(`
+    SELECT COALESCE(discount, 0) AS general_discount
+    FROM budget
+    WHERE id = ?
+  `).get(budget_id);
+
+  const itemsTotals = db.prepare(`
+    SELECT
+      COALESCE(SUM(unit_cost * quantity), 0) AS total_cost,
+      COALESCE(SUM((unit_price * quantity) * (1 - (discount / 100.0))), 0) AS total_items_price
+    FROM budget_item
+    WHERE budget_id = ? AND active = 1
+  `).get(budget_id);
+
+  const total_price =
+    itemsTotals.total_items_price * (1 - (budget.general_discount / 100.0));
+
+  db.prepare(`
+    UPDATE budget
+    SET total_cost = ?,
+        total_price = ?
+    WHERE id = ?
+  `).run(itemsTotals.total_cost, total_price, budget_id);
+
+  return {
+    total_cost: itemsTotals.total_cost,
+    total_items_price: itemsTotals.total_items_price,
+    general_discount: budget.general_discount,
+    total_price
+  };
 }
 
 export function deleteBudget(id) {
@@ -49,6 +82,9 @@ export function listBudgets(searchValue = null, limit = 5, index = 1) {
       b.payment_id,
       b.notes,
       b.created_at,
+      b.total_cost,
+      b.total_price,
+      b.installments,
       b.active,
       c.name || ' ' || c.surname AS customer_name,
       p.name AS payment_name
@@ -109,6 +145,11 @@ ipcMain.handle('db:getBudgetById', async (event, id) => {
 ipcMain.handle('db:updateBudget', async (event, budgetData) => {
   const success = updateBudget(budgetData);
   return { success };
+});
+
+ipcMain.handle('db:updateBudgetTotals', async (event, budget_id) => {
+  updateBudgetTotals(budget_id);
+  return { success: true };
 });
 
 ipcMain.handle('db:deleteBudget', async (event, id) => {
