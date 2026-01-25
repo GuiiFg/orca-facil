@@ -1,8 +1,8 @@
 {
-  "name": "orca-facil",
-  "productName": "orca-facil",
-  "version": "1.0.0",
-  "description": "My Electron application description",
+  "name": "orcafacil",
+  "productName": "orcafacil",
+  "version": "1.0.1",
+  "description": "App para gerar orcamentos de forma facil",
   "main": ".vite/build/main.js",
   "scripts": {
     "start": "electron-forge start",
@@ -11,7 +11,9 @@
     "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\"",
     "postinstall": "install-app-deps",
-    "rebuild": "electron-rebuild -f -w better-sqlite3"
+    "rebuild": "electron-rebuild -f -w better-sqlite3",
+    "build": "vite build",
+    "dist": "electron-builder"
   },
   "keywords": [],
   "author": {
@@ -25,7 +27,7 @@
     "@electron-forge/maker-rpm": "^7.10.2",
     "@electron-forge/maker-squirrel": "^7.10.2",
     "@electron-forge/maker-wix": "^7.10.2",
-    "@electron-forge/maker-zip": "^7.10.2",
+    "@electron-forge/maker-zip": "^7.11.1",
     "@electron-forge/plugin-auto-unpack-natives": "^7.10.2",
     "@electron-forge/plugin-fuses": "^7.10.2",
     "@electron-forge/plugin-vite": "^7.10.2",
@@ -35,7 +37,7 @@
     "@tailwindcss/vite": "^4.1.15",
     "@vitejs/plugin-vue": "^6.0.1",
     "electron": "38.3.0",
-    "electron-builder": "^26.0.12",
+    "electron-builder": "^26.4.0",
     "electron-rebuild": "^3.2.9",
     "electron-reloader": "^1.2.3",
     "tailwindcss": "^4.1.15",

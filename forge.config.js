@@ -3,16 +3,23 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 
 module.exports = {
   packagerConfig: {
-    asar: false, // Desativa o asar para depuração
+    asar: false , // Desativa o asar para depuração
     asarUnpack: [
       'node_modules/better-sqlite3/**/*', // Garante que o módulo seja extraído
     ],
+    name: 'OrcaFacil'
   },
   rebuildConfig: {},
   makers: [
     {
+      name: '@electron-forge/maker-zip',
+      platforms: ['win32']
+    },
+    {
       name: '@electron-forge/maker-squirrel',
-      config: {},
+      config: {
+        name: 'orcafacil'
+      },
     },
     {
       name: '@electron-forge/maker-zip',
@@ -60,5 +67,5 @@ module.exports = {
       [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
       [FuseV1Options.OnlyLoadAppFromAsar]: true,
     }),
-  ],
+  ]
 };
