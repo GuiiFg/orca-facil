@@ -1,7 +1,7 @@
 <template>
   <section class="relative bg-center bg-no-repeat bg-[url('https://www.ifinance.com.br/wp-content/uploads/2024/07/capas-de-blog-22.png')] bg-gray-800 bg-blend-multiply text-center py-32">
     <div class="absolute inset-0 bg-gradient-to-b from-black/50 to-gray-900/60"></div>
-    <div class="relative z-10 px-4 mx-auto max-w-screen-md">
+    <div class="relative px-4 mx-auto max-w-screen-md">
       <img
           src="@/assets/logos/logo_name.svg"
           alt="Orça Fácil"

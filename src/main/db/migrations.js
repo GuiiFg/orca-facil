@@ -76,4 +76,14 @@ export function runMigrations() {
       active INTEGER DEFAULT 1
     );
   `).run();
+
+  // drop table setting if exists to recreate it
+  // db.prepare(`DROP TABLE IF EXISTS setting;`).run();
+
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS setting (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      budget_image TEXT NULL
+    );
+  `).run();
 }

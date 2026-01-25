@@ -10,7 +10,7 @@
         </SidebarDropItem> -->
         <SidebarItem label="Produtos e Serviços" icon="fas fa-box" :click="handleGoToProductsAndServices" />
         <SidebarItem label="Meios de Pagamento" icon="fas fa-credit-card" :click="handleGoToPayments" />
-        <SidebarItem label="Configurações" icon="fas fa-cog" :click="handleGoToHome" />
+        <SidebarItem label="Configurações" icon="fas fa-cog" :click="handleGoToSettings" />
       </FwbSidebar>
     </transition>
   </div>
@@ -55,6 +55,13 @@ const handleGoToHome = () => {
 
 const handleGoToBudget = () => {
   router.push({ name: 'budget' })
+  if (sideBarActions.sidebarOpen) {
+    sideBarActions.toggle()
+  }
+}
+
+const handleGoToSettings = () => {
+  router.push({ name: 'settings' })
   if (sideBarActions.sidebarOpen) {
     sideBarActions.toggle()
   }

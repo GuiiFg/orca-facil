@@ -3,6 +3,9 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
 contextBridge.exposeInMainWorld('api', {
+  selectFile: () => ipcRenderer.invoke('select-file'),
+  fileToBase64: (filePath) => ipcRenderer.invoke('file-to-base64', filePath),
+  savePdf: (buffer) => ipcRenderer.invoke('save-pdf', buffer),
   customer: {
     add: (data) => ipcRenderer.invoke('db:createCustomer', data),
     search: (value = null, limit = 5, index = 0) => ipcRenderer.invoke('db:listCustomers', value, limit, index),
@@ -38,5 +41,10 @@ contextBridge.exposeInMainWorld('api', {
     getById: (id) => ipcRenderer.invoke('db:getBudgetItemById', id),
     delete: (id) => ipcRenderer.invoke('db:deleteBudgetItem', id),
     update: (data) => ipcRenderer.invoke('db:updateBudgetItem', data)
+  },
+  setting: {
+    create: (data) => ipcRenderer.invoke('db:createSetting', data),
+    get: () => ipcRenderer.invoke('db:getSetting'),
+    update: (data) => ipcRenderer.invoke('db:updateSetting', data)
   }
 });
