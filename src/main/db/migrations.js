@@ -81,6 +81,19 @@ export function runMigrations() {
   // db.prepare(`DROP TABLE IF EXISTS setting;`).run();
 
   db.prepare(`
+    CREATE TABLE IF NOT EXISTS budget_payment (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      budget_id INTEGER NOT NULL,
+      payment_id INTEGER NOT NULL,
+      installments INTEGER NOT NULL,
+      installment_value REAL NOT NULL,
+      discount REAL NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      active INTEGER DEFAULT 1
+    );
+  `).run();
+
+  db.prepare(`
     CREATE TABLE IF NOT EXISTS setting (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       budget_image TEXT NULL

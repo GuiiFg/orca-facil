@@ -3,8 +3,8 @@ import db from '../../index.js';
 
 export function createBudget(budgetData) {
   const stmt = db.prepare(`
-  INSERT INTO budget (code, customer_id, payment_id, notes, discount, total_cost, total_price, installments)
-  VALUES (@code, @customer_id, @payment_id, @notes, 0, 0, 0, 1)`);
+  INSERT INTO budget (code, customer_id, notes, discount, total_cost, total_price, installments)
+  VALUES (@code, @customer_id, @notes, 0, 0, 0, 1)`);
   const info = stmt.run(budgetData);
   return info.lastInsertRowid;
 }
@@ -19,7 +19,6 @@ export function updateBudget(budgetData) {
   UPDATE budget SET
     code = @code,
     customer_id = @customer_id,
-    payment_id = @payment_id,
     installments = @installments,
     notes = @notes
   WHERE id = @id`);
@@ -57,6 +56,17 @@ export function updateBudgetTotals(budget_id) {
     WHERE id = ?
   `).run(itemsTotals.total_cost, total_price, budget_id);
 
+  // Recalculate payment installments
+  const payments = db.prepare(`SELECT * FROM budget_payment WHERE budget_id = ? AND active = 1`).all(budget_id);
+  for (const pay of payments) {
+    let finalInstallment = 0;
+    if (pay.installments > 0) {
+      const discountVal = (total_price * pay.discount) / 100.0;
+      finalInstallment = (total_price - discountVal) / pay.installments;
+    }
+    db.prepare(`UPDATE budget_payment SET installment_value = ? WHERE id = ?`).run(finalInstallment, pay.id);
+  }
+
   return {
     total_cost: itemsTotals.total_cost,
     total_items_price: itemsTotals.total_items_price,
@@ -85,34 +95,30 @@ export function listBudgets(searchValue = null, limit = 5, index = 1) {
     SELECT 
       b.id, b.code,
       b.customer_id,
-      b.payment_id,
       b.notes,
       b.created_at,
       b.total_cost,
       b.total_price,
       b.installments,
       b.active,
-      c.name || ' ' || c.surname AS customer_name,
-      p.name AS payment_name
+      c.name || ' ' || c.surname AS customer_name
     FROM budget b
     LEFT JOIN customer c ON b.customer_id = c.id
-    LEFT JOIN payment p ON b.payment_id = p.id
     WHERE b.active = 1 ` +
-    (searchValue ? `AND (b.code LIKE ? OR c.name LIKE ? OR p.name LIKE ? ) ` : '') +
+    (searchValue ? `AND (b.code LIKE ? OR c.name LIKE ? ) ` : '') +
     ` ORDER BY b.code LIMIT ? OFFSET ?`;
   if (searchValue) {
     const likeValue = `%${searchValue}%`;
     stmt = db.prepare(query);
-    reponse.data = stmt.all(likeValue, likeValue, likeValue, limit, index * limit);
+    reponse.data = stmt.all(likeValue, likeValue, limit, index * limit);
     const countQuery = `
       SELECT COUNT(*) as count
       FROM budget b
       LEFT JOIN customer c ON b.customer_id = c.id
-      LEFT JOIN payment p ON b.payment_id = p.id
       WHERE b.active = 1 ` +
-      (searchValue ? `AND (b.code LIKE ? OR c.name LIKE ? OR p.name LIKE ? ) ` : '');
+      (searchValue ? `AND (b.code LIKE ? OR c.name LIKE ? ) ` : '');
     const countStmt = db.prepare(countQuery);
-    const countResult = countStmt.get(likeValue, likeValue, likeValue);
+    const countResult = countStmt.get(likeValue, likeValue);
     reponse.total = countResult.count;
     reponse.pages = Math.ceil(reponse.total / limit);
     return reponse;
@@ -123,7 +129,6 @@ export function listBudgets(searchValue = null, limit = 5, index = 1) {
       SELECT COUNT(*) as count
       FROM budget b
       LEFT JOIN customer c ON b.customer_id = c.id
-      LEFT JOIN payment p ON b.payment_id = p.id
       WHERE b.active = 1`;
     const countStmt = db.prepare(countQuery);
     const countResult = countStmt.get();

@@ -29,22 +29,11 @@
           <div class="flex flex-row gap-5">
             <div class="grow">
               <p class="font-medium text-gray-900 dark:text-white mb-2">Cliente:</p>
-              <div class="auto-complete-fixer">
+              <div class="auto-complete-fixer w-full">
                 <FwbAutocomplete class="bg-white dark:bg-gray-800" type="text" placeholder="Digite para buscar o cliente" v-model="editForm.customer_id.value" :options="editForm.customer_id.options"
                   :validation-status="editForm.customer_id.status" :required="editForm.customer_id.required" display="name" @search="searchCustomers">
                   <template #validationMessage>
                     <span v-for="msg in editForm.customer_id.errors" :key="msg">{{ msg }}</span>
-                  </template>
-                </FwbAutocomplete>
-              </div>
-            </div>
-            <div class="grow">
-              <p class="font-medium text-gray-900 dark:text-white mb-2">Meio de Pagamento:</p>
-              <div class="auto-complete-fixer">
-                <FwbAutocomplete class="bg-white dark:bg-gray-800" type="text" placeholder="Digite para buscar o cliente" v-model="editForm.payment_id.value" :options="editForm.payment_id.options"
-                  :validation-status="editForm.payment_id.status" :required="editForm.payment_id.required" display="name" @search="searchPayments">
-                  <template #validationMessage>
-                    <span v-for="msg in editForm.payment_id.errors" :key="msg">{{ msg }}</span>
                   </template>
                 </FwbAutocomplete>
               </div>
@@ -65,31 +54,87 @@
         <FwbAccordionHeader>
           <div class="flex justify-start items-start">
             <div class="content-start">
-              <FontAwesomeIcon icon="fas fa-chart-simple" /> Valores
+              <FontAwesomeIcon icon="fas fa-chart-simple" /> Painel de Valores
             </div>
           </div>
         </FwbAccordionHeader>
           <FwbAccordionContent>
-          <div>
-            <div class="flex justify-center items-center gap-10 mb-2" v-if="budget">
-              <FwbHeading tag="h3" class="w-min">
-                <div class="flex justify-center items-center gap-2 text-blue-400">
-                  <FontAwesomeIcon icon="fas fa-arrow-up" />
-                  <span>{{ formatMoney(budget.total_price) }}</span>
+          <div v-if="budget">
+            <!-- KPI Cards Row -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <!-- Receita -->
+              <div class="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:-translate-y-0.5 transition-transform">
+                <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-800 flex-shrink-0">
+                  <FontAwesomeIcon icon="fas fa-arrow-trend-up" class="text-blue-500 dark:text-blue-300 text-lg" />
                 </div>
-              </FwbHeading>
-              <FwbHeading tag="h3" class="w-min">
-                <div class="flex justify-center items-center gap-2 text-red-400">
-                  <FontAwesomeIcon icon="fas fa-arrow-down" />
-                  <span>{{ formatMoney(budget.total_cost) }}</span>
+                <div>
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Receita Total</p>
+                  <p class="text-xl font-bold text-blue-600 dark:text-blue-400">{{ formatMoney(budget.total_price) }}</p>
                 </div>
-              </FwbHeading>
-              <FwbHeading tag="h3" class="w-min">
-                <div class="flex justify-center items-center gap-2 text-green-400">
-                  <FontAwesomeIcon icon="fas fa-plus" />
-                  <span>{{ formatMoney(budget.total_price - budget.total_cost) }}</span>
+              </div>
+              <!-- Custo -->
+              <div class="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:-translate-y-0.5 transition-transform">
+                <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-red-100 dark:bg-red-800 flex-shrink-0">
+                  <FontAwesomeIcon icon="fas fa-arrow-trend-down" class="text-red-500 dark:text-red-300 text-lg" />
                 </div>
-              </FwbHeading>
+                <div>
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Custo Total</p>
+                  <p class="text-xl font-bold text-red-600 dark:text-red-400">{{ formatMoney(budget.total_cost) }}</p>
+                </div>
+              </div>
+              <!-- Lucro -->
+              <div class="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:-translate-y-0.5 transition-transform">
+                <div class="flex items-center justify-center w-10 h-10 rounded-lg flex-shrink-0" :class="profitValue >= 0 ? 'bg-green-100 dark:bg-green-800' : 'bg-orange-100 dark:bg-orange-800'">
+                  <FontAwesomeIcon :icon="profitValue >= 0 ? 'fas fa-hand-holding-dollar' : 'fas fa-triangle-exclamation'" :class="profitValue >= 0 ? 'text-green-500 dark:text-green-300' : 'text-orange-500 dark:text-orange-300'" class="text-lg" />
+                </div>
+                <div>
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Lucro Bruto</p>
+                  <p class="text-xl font-bold" :class="profitValue >= 0 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'">{{ formatMoney(profitValue) }}</p>
+                </div>
+              </div>
+              <!-- Margem -->
+              <div class="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:-translate-y-0.5 transition-transform">
+                <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-800 flex-shrink-0">
+                  <FontAwesomeIcon icon="fas fa-percent" class="text-purple-500 dark:text-purple-300 text-lg" />
+                </div>
+                <div>
+                  <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Margem de Lucro</p>
+                  <p class="text-xl font-bold text-purple-600 dark:text-purple-400">{{ profitMarginPercent }}%</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Profit Margin Bar -->
+            <div class="mb-6">
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Margem de Lucro</span>
+                <span class="text-sm font-medium" :class="profitMarginPercent >= 30 ? 'text-green-500' : profitMarginPercent >= 15 ? 'text-yellow-500' : 'text-red-500'">{{ profitMarginPercent }}%</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-3 dark:bg-gray-600 overflow-hidden">
+                <div class="h-3 rounded-full transition-all duration-700 ease-out" :class="profitMarginPercent >= 30 ? 'bg-gradient-to-r from-green-400 to-green-600' : profitMarginPercent >= 15 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' : 'bg-gradient-to-r from-red-400 to-red-600'" :style="{ width: Math.min(Math.max(profitMarginPercent, 0), 100) + '%' }"></div>
+              </div>
+            </div>
+
+            <!-- Visual Breakdown Bar -->
+            <div class="mb-4">
+              <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Composição do Orçamento</p>
+              <div class="flex w-full h-8 rounded-lg overflow-hidden shadow-inner">
+                <div class="bg-gradient-to-b from-red-400 to-red-600 flex items-center justify-center text-xs text-white font-semibold transition-all duration-700" :style="{ width: costBarPercent + '%' }" v-if="costBarPercent > 5">
+                  Custo {{ costBarPercent }}%
+                </div>
+                <div class="bg-gradient-to-b from-green-400 to-green-600 flex items-center justify-center text-xs text-white font-semibold transition-all duration-700" :style="{ width: profitBarPercent + '%' }" v-if="profitBarPercent > 5">
+                  Lucro {{ profitBarPercent }}%
+                </div>
+                <div class="bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-xs text-gray-600 dark:text-gray-300 font-semibold" v-if="budget.total_price <= 0" style="width:100%">
+                  Sem valores
+                </div>
+              </div>
+            </div>
+
+            <!-- Discount info -->
+            <div class="flex items-center gap-2 mt-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700" v-if="budget.discount > 0">
+              <FontAwesomeIcon icon="fas fa-tag" class="text-yellow-500" />
+              <span class="text-sm text-gray-600 dark:text-gray-400">Desconto geral aplicado: <strong class="text-yellow-600 dark:text-yellow-400">{{ budget.discount }}%</strong></span>
             </div>
           </div>
         </FwbAccordionContent>
@@ -166,32 +211,7 @@
           </div>
         </FwbAccordionContent>
       </FwbAccordionPanel>
-      <FwbAccordionPanel>
-        <FwbAccordionHeader>
-          <div class="flex justify-start items-start">
-            <div class="content-start">
-              <FontAwesomeIcon icon="fas fa-credit-card" /> Meio de Pagamento
-            </div>
-          </div>
-        </FwbAccordionHeader>
-        <FwbAccordionContent>
-          <div v-if="payment">
-            <div class="flex flex-row gap-5">
-              <div class="grow">
-                <p class="font-medium text-gray-900 dark:text-white mb-2">Nome:</p>
-                <FwbInput type="text" disabled v-model="payment.name" />
-              </div>
-              <div class="grow">
-                <p class="font-medium text-gray-900 dark:text-white mb-2">Descrição:</p>
-                <FwbInput type="text" disabled v-model="payment.description" />
-              </div>
-            </div>
-          </div>
-          <div class="mt-4">
-            <FwbButton @click="onShowAddClientModal"><FontAwesomeIcon icon="fas fa-pen" /> Editar orçamento</FwbButton>
-          </div>
-        </FwbAccordionContent>
-      </FwbAccordionPanel>
+
       <FwbAccordionPanel>
         <FwbAccordionHeader>
           <div class="flex justify-start items-start">
@@ -243,9 +263,35 @@
         <TableColumn isActions hasEdit hasDelete v-on:line:edit="handleEditItem(item.id)" v-on:line:delete="handleDeleteItem(item.id)" />
       </fwb-table-row>
     </Tables>
-    <FwbButton class="mt-4" color="green" @click="handleGeneratePdf">
-      <FontAwesomeIcon icon="fas fa-file-pdf" /> Gerar PDF do Orçamento
-    </FwbButton>
+
+    <Tables
+      class="w-full p-5 mt-4"
+      hasSearch
+      hasNew
+      hasReload
+      v-on:search="handleSearchPayments"
+      v-on:reload="handleSearchBudgetPayments"
+      v-on:new="showBudgetPaymentModal = true"
+      :columns="['Meio de Pagamento', 'Parcelas', 'Valor da Parcela', 'Desconto', 'Ações']">
+      <fwb-table-row v-if="budgetPayments.length === 0">
+        <td colspan="5" class="text-center py-4">
+          Nenhum meio de pagamento adicionado ao orçamento.
+        </td>
+      </fwb-table-row>
+      <fwb-table-row v-else v-for="(pay, index) in budgetPayments" :key="pay.id">
+        <TableColumn isText :value="pay.payment_name" />
+        <TableColumn isText :value="pay.installments" />
+        <TableColumn isMoney :value="pay.installment_value" />
+        <TableColumn isPercent :value="pay.discount" />
+        <TableColumn isActions hasEdit hasDelete v-on:line:edit="handleEditPayment(pay.id)" v-on:line:delete="handleDeletePayment(pay.id)" />
+      </fwb-table-row>
+    </Tables>
+    <div class="mt-4 flex justify-end">
+      <FwbButton color="green" @click="handleGeneratePdf">
+        <FontAwesomeIcon icon="fas fa-file-pdf" /> Gerar PDF do Orçamento
+      </FwbButton>
+    </div>
+    <BudgetPaymentModal :budgetTotal="budget.total_price" ref="modalPaymentRef" v-if="showBudgetPaymentModal" @close="showBudgetPaymentModal = false" @payment:create="handleCreatePayment" @payment:update="handleUpdatePayment"/>
     <BudgetItemModal ref="modalItemRef" v-if="showBudgetItemModal" @close="showBudgetItemModal = false" @item:create="handleCreateItem" @item:update="handleUpdateItem"/>
   </div>
 </template>
@@ -257,10 +303,11 @@ import {
 } from 'flowbite-vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { useRouter } from 'vue-router'
-import { nextTick, onMounted, ref, toRaw } from "vue";
+import { nextTick, onMounted, ref, toRaw, computed } from "vue";
 import TableColumn from '@/components/dataManagers/TableColumn/tableColumn.vue'
 import Tables from '@/components/dataManagers/Tables/tables.vue'
 import BudgetItemModal from './modals/budgetItemModal.vue'
+import BudgetPaymentModal from './modals/budgetPaymentModal.vue'
 import EditForm from './form.js'
 import Forms from '@/components/dataManagers/Forms/forms.vue'
 import FormHelpers from '@/helpers/formHelpers.js'
@@ -271,17 +318,20 @@ const router = useRouter()
 const budgetId = router.currentRoute.value.params.id
 const budget = ref(null)
 const customer = ref(null)
-const payment = ref(null)
 const showBudgetItemModal = ref(false)
+const showBudgetPaymentModal = ref(false)
 const budgetItems = ref([])
+const budgetPayments = ref([])
 const currentPage = ref(1)
 const totalPages = ref(1)
 const totalItems = ref(0)
 const searchQuery = ref(null)
+const searchPaymentQuery = ref(null)
 const showAddClientModal = ref(false)
 const editForm = ref({ ...EditForm })
 
 const modalItemRef = ref(null)
+const modalPaymentRef = ref(null)
 
 onMounted(async () => {
   if (!budgetId) {
@@ -294,7 +344,6 @@ onMounted(async () => {
 
 const loadBudgetDetails = async () => {
   customer.value = null
-  payment.value = null
   const response = await window.api.budget.getById(budgetId)
   budget.value = response.budget
 
@@ -302,12 +351,49 @@ const loadBudgetDetails = async () => {
     const customerResponse = await window.api.customer.getById(budget.value.customer_id)
     customer.value = customerResponse.customer
   }
-  if (budget.value.payment_id) {
-    const paymentResponse = await window.api.payment.getById(budget.value.payment_id)
-    payment.value = paymentResponse.payment
-  }
 
   await handleSearchBudgetItems()
+  await handleSearchBudgetPayments()
+}
+
+const handleSearchBudgetPayments = async () => {
+  const filters = { 
+    budget_id: budgetId,
+    search: searchPaymentQuery.value
+  }
+  const response = await window.api.budgetPayment.search(filters, 50, 1)
+  budgetPayments.value = response.data
+}
+
+const handleSearchPayments = async (query) => {
+  searchPaymentQuery.value = query
+  await handleSearchBudgetPayments()
+}
+
+const handleCreatePayment = async (paymentData) => {
+  paymentData.budget_id = budgetId
+  await window.api.budgetPayment.add(paymentData)
+  await loadBudgetDetails()
+}
+
+const handleUpdatePayment = async (paymentData) => {
+  paymentData.budget_id = budgetId
+  await window.api.budgetPayment.update(paymentData)
+  await loadBudgetDetails()
+}
+
+const handleEditPayment = async (paymentId) => {
+  showBudgetPaymentModal.value = true
+  nextTick(() => {
+    if (modalPaymentRef.value && modalPaymentRef.value.handleEditItem) {
+      modalPaymentRef.value.handleEditItem(paymentId)
+    }
+  })
+}
+
+const handleDeletePayment = async (paymentId) => {
+  await window.api.budgetPayment.delete(paymentId)
+  await loadBudgetDetails()
 }
 
 const handleSearch = async (query) => {
@@ -376,18 +462,6 @@ const searchCustomers = async (query) => {
   }))
 }
 
-const searchPayments = async (query) => {
-  if (!query || query.length < 1) {
-    editForm.value.payment_id.options = []
-    return
-  }
-  const response = await window.api.payment.search(query, 5, 1)
-  editForm.value.payment_id.options = response.data.map(payment => ({
-    id: payment.id,
-    name: payment.name,
-  }))
-}
-
 const handleClear = () => {
   FormHelpers.clearForm(editForm.value)
 }
@@ -395,14 +469,12 @@ const handleClear = () => {
 const handleSave = async () => {
   const finalForm = ref(JSON.parse(JSON.stringify(toRaw(editForm.value))))
   if (editForm.value.customer_id.value) finalForm.value.customer_id.value = editForm.value.customer_id.value.id
-  if (editForm.value.payment_id.value) finalForm.value.payment_id.value = editForm.value.payment_id.value.id
 
   const isValid = FormHelpers.validateForm(finalForm.value)
   if (!isValid) return
 
   const budgetData = JSON.parse(JSON.stringify(toRaw(budget.value)))
   budgetData.customer_id = finalForm.value.customer_id.value
-  budgetData.payment_id = finalForm.value.payment_id.value
   budgetData.notes = finalForm.value.notes.value
 
   await window.api.budget.update(budgetData)
@@ -422,166 +494,267 @@ const onShowAddClientModal = () => {
     }
   }
 
-  if (payment.value) {
-    editForm.value.payment_id.value = {
-      id: payment.value.id,
-      name: payment.value.name
-    }
-  }
-
   editForm.value.notes.value = budget.value.notes || null
 
   showAddClientModal.value = true
 }
 
 const handleGeneratePdf = async () => {
+  const primaryColor = '#1e3a5f'
+  const accentColor = '#2563eb'
+  const lightGray = '#f8fafc'
+  const mediumGray = '#e2e8f0'
+  const darkText = '#1e293b'
+  const mutedText = '#64748b'
+
   const dd = {
     pageSize: 'A4',
-    pageMargins: [40, 40, 40, 40],
+    pageMargins: [40, 40, 40, 60],
+    footer: function(currentPage, pageCount) {
+      return {
+        columns: [
+          { text: 'Orçamento gerado pelo sistema OrcaFácil', fontSize: 7, color: mutedText, margin: [40, 20, 0, 0] },
+          { text: 'Página ' + currentPage + ' de ' + pageCount, fontSize: 7, color: mutedText, alignment: 'right', margin: [0, 20, 40, 0] }
+        ]
+      }
+    },
     content: [],
     styles: {
-      title: {
-        fontSize: 18,
-        bold: true
-      },
-      subTitle: {
-        fontSize: 10,
-        color: '#555'
-      },
-      sectionTitle: {
-        fontSize: 13,
-        bold: true,
-        margin: [0, 15, 0, 8]
-      },
-      tableHeader: {
-        bold: true,
-        fillColor: '#eeeeee'
-      }
-    }
+      title: { fontSize: 22, bold: true, color: primaryColor },
+      subTitle: { fontSize: 9, color: mutedText },
+      sectionTitle: { fontSize: 12, bold: true, color: primaryColor, margin: [0, 20, 0, 8] },
+      tableHeader: { bold: true, fontSize: 9, color: '#ffffff', fillColor: primaryColor },
+      tableCell: { fontSize: 9, color: darkText },
+      tableCellRight: { fontSize: 9, color: darkText, alignment: 'right' },
+      totalLabel: { fontSize: 10, color: darkText },
+      totalValue: { fontSize: 10, color: darkText, bold: true },
+      grandTotalLabel: { fontSize: 12, color: primaryColor, bold: true },
+      grandTotalValue: { fontSize: 12, color: primaryColor, bold: true }
+    },
+    defaultStyle: { fontSize: 9, color: darkText }
   }
 
   const settingResponse = await window.api.setting.get()
   const setting = settingResponse.setting || null
 
-  //hearder
-  dd.content.push({
-    columns: [
-      {
-        image: setting && setting.budget_image ? setting.budget_image : null,
-        width: 70
-      },
-      {
-        stack: [
-          { text: 'ORÇAMENTO', style: 'title' },
-          { text: 'Código: ' + budget.value.code, style: 'subTitle' },
-          { text: 'Data: ' + new Date().toLocaleDateString(), style: 'subTitle' }
-        ],
-        alignment: 'right'
-      }
-    ]
+  // === HEADER ===
+  const headerColumns = []
+  if (setting && setting.budget_image) {
+    headerColumns.push({ image: setting.budget_image, width: 65 })
+  }
+  headerColumns.push({
+    stack: [
+      { text: 'ORÇAMENTO', style: 'title' },
+      { canvas: [{ type: 'line', x1: 0, y1: 2, x2: 150, y2: 2, lineWidth: 2, lineColor: accentColor }] },
+      { text: ' ', fontSize: 4 },
+      { text: 'Código: ' + budget.value.code, style: 'subTitle' },
+      { text: 'Data: ' + new Date().toLocaleDateString('pt-BR'), style: 'subTitle' }
+    ],
+    alignment: 'right'
   })
-  dd.content.push({ text: '\n' })
+  dd.content.push({ columns: headerColumns })
 
-  // cliente 
-  dd.content.push({
-    text: 'Dados do Cliente',
-    style: 'sectionTitle'
-  })
-  dd.content.push({
-    columns: [
-      {
-        width: '*',
-        text: [
-          { text: customer.value.name + ' ' + customer.value.surname + '\n', bold: true },
-          'Documento: ' + customer.value.document + '\n',
-          'Email: ' + customer.value.email + '\n',
-          'Telefone: ' + customer.value.phone
-        ]
-      },
-      {
-        width: '*',
-        text: [
-          'Endereço:\n',
-          (customer.value.street ? customer.value.street : 'N/A') + ', ' + (customer.value.number ? customer.value.number : 'N/A') + '\n',
-          (customer.value.district ? customer.value.district : 'N/A') + ' - ' + (customer.value.city ? customer.value.city : 'N/A') + '/' + (customer.value.state ? customer.value.state : 'N/A') + '\n',
-          'CEP: ' + (customer.value.zipcode ? customer.value.zipcode : 'N/A') + '\n'
-        ]
-      }
-    ]
-  })
-  dd.content.push({ text: '\n' })
+  // Separator line
+  dd.content.push({ canvas: [{ type: 'line', x1: 0, y1: 10, x2: 515, y2: 10, lineWidth: 0.5, lineColor: mediumGray }] })
 
-  // itens
-  dd.content.push({
-    text: 'Itens do Orçamento',
-    style: 'sectionTitle'
-  })
-  dd.content.push({
+  // === CLIENTE ===
+  dd.content.push({ text: 'DADOS DO CLIENTE', style: 'sectionTitle' })
+  if (customer.value) {
+    dd.content.push({
       table: {
-      widths: ['auto', '*', 'auto', 'auto', 'auto', 'auto'],
-      body: [
-        [
-          { text: 'Tipo', style: 'tableHeader' },
-          { text: 'Descrição', style: 'tableHeader' },
-          { text: 'Qtd', style: 'tableHeader' },
-          { text: 'Valor Unit.', style: 'tableHeader' },
-          { text: 'Desc(%)', style: 'tableHeader' },
-          { text: 'Total', style: 'tableHeader' }
-        ],
-
-        ...budgetItems.value.map(item => ([
-          item.product_code,
-          item.product_name,
-          item.quantity,
-          { text: formatMoney(item.unit_price), alignment: 'right' },
-          { text: item.discount ? (item.discount.toString() + ' %') : '0 %', alignment: 'right' },
-          { text: formatMoney(item.total_price), alignment: 'right' }
-        ]))
-      ]
-    },
-    layout: 'lightHorizontalLines'
-  }),
-  dd.content.push({ text: '\n' })
-
-  // totais
-  dd.content.push({
-    alignment: 'right',
-    table: {
-      widths: ['*', 'auto'],
-      body: [
-        ['Subtotal', formatMoney(calculateTotalWithoutDiscount(budgetItems.value) || 0)],
-        ['Descontos', formatMoney(calculateTotalDiscount(budgetItems.value) || 0)],
-        [
-          { text: 'Total Geral', bold: true },
-          { text: formatMoney(budget.value.total_price), bold: true }
+        widths: ['*', '*'],
+        body: [
+          [
+            {
+              stack: [
+                { text: (customer.value.name || '') + ' ' + (customer.value.surname || ''), bold: true, fontSize: 11, color: darkText },
+                { text: ' ', fontSize: 4 },
+                { text: 'Documento: ' + (customer.value.document || 'N/A'), fontSize: 9, color: mutedText },
+                { text: 'Email: ' + (customer.value.email || 'N/A'), fontSize: 9, color: mutedText },
+                { text: 'Telefone: ' + (customer.value.phone || 'N/A'), fontSize: 9, color: mutedText }
+              ],
+              border: [false, false, false, false],
+              fillColor: lightGray,
+              margin: [8, 8, 8, 8]
+            },
+            {
+              stack: [
+                { text: 'Endereço', bold: true, fontSize: 9, color: darkText },
+                { text: ' ', fontSize: 4 },
+                { text: (customer.value.street || 'N/A') + ', ' + (customer.value.number || 'S/N'), fontSize: 9, color: mutedText },
+                { text: (customer.value.district || '') + ' - ' + (customer.value.city || '') + '/' + (customer.value.state || ''), fontSize: 9, color: mutedText },
+                { text: 'CEP: ' + (customer.value.zipcode || 'N/A'), fontSize: 9, color: mutedText }
+              ],
+              border: [false, false, false, false],
+              fillColor: lightGray,
+              margin: [8, 8, 8, 8]
+            }
+          ]
         ]
+      },
+      layout: 'noBorders'
+    })
+  }
+
+  // === ITENS ===
+  dd.content.push({ text: 'ITENS DO ORÇAMENTO', style: 'sectionTitle' })
+  const itemsTableBody = [
+    [
+      { text: '#', style: 'tableHeader', alignment: 'center' },
+      { text: 'Descrição', style: 'tableHeader' },
+      { text: 'Qtd', style: 'tableHeader', alignment: 'center' },
+      { text: 'Valor Unit.', style: 'tableHeader', alignment: 'right' },
+      { text: 'Desc.', style: 'tableHeader', alignment: 'center' },
+      { text: 'Total', style: 'tableHeader', alignment: 'right' }
+    ]
+  ]
+  budgetItems.value.forEach((item, idx) => {
+    const rowColor = idx % 2 === 0 ? '#ffffff' : lightGray
+    itemsTableBody.push([
+      { text: (idx + 1).toString(), alignment: 'center', fillColor: rowColor, style: 'tableCell' },
+      { text: item.product_name || '', fillColor: rowColor, style: 'tableCell' },
+      { text: item.quantity.toString(), alignment: 'center', fillColor: rowColor, style: 'tableCell' },
+      { text: formatMoney(item.unit_price), alignment: 'right', fillColor: rowColor, style: 'tableCell' },
+      { text: item.discount ? item.discount + '%' : '0%', alignment: 'center', fillColor: rowColor, style: 'tableCell' },
+      { text: formatMoney(item.total_price), alignment: 'right', fillColor: rowColor, style: 'tableCell' }
+    ])
+  })
+  dd.content.push({
+    table: {
+      headerRows: 1,
+      widths: [25, '*', 35, 70, 40, 75],
+      body: itemsTableBody
+    },
+    layout: {
+      hLineWidth: () => 0.5,
+      vLineWidth: () => 0,
+      hLineColor: () => mediumGray,
+      paddingLeft: () => 6,
+      paddingRight: () => 6,
+      paddingTop: () => 5,
+      paddingBottom: () => 5
+    }
+  })
+
+  // === TOTAIS ===
+  dd.content.push({ text: '', margin: [0, 10, 0, 0] })
+  dd.content.push({
+    columns: [
+      { width: '*', text: '' },
+      {
+        width: 220,
+        table: {
+          widths: ['*', 'auto'],
+          body: [
+            [
+              { text: 'Subtotal', style: 'totalLabel', border: [false, false, false, true], borderColor: [null, null, null, mediumGray] },
+              { text: formatMoney(calculateTotalWithoutDiscount(budgetItems.value) || 0), style: 'totalValue', alignment: 'right', border: [false, false, false, true], borderColor: [null, null, null, mediumGray] }
+            ],
+            [
+              { text: 'Descontos', style: 'totalLabel', border: [false, false, false, true], borderColor: [null, null, null, mediumGray] },
+              { text: '- ' + formatMoney(calculateTotalDiscount(budgetItems.value) || 0), style: 'totalValue', alignment: 'right', color: '#ef4444', border: [false, false, false, true], borderColor: [null, null, null, mediumGray] }
+            ],
+            [
+              { text: 'TOTAL GERAL', style: 'grandTotalLabel', border: [false, false, false, false], margin: [0, 6, 0, 0] },
+              { text: formatMoney(budget.value.total_price), style: 'grandTotalValue', alignment: 'right', border: [false, false, false, false], margin: [0, 6, 0, 0] }
+            ]
+          ]
+        },
+        layout: {
+          hLineWidth: (i) => i === 0 ? 0 : 0.5,
+          vLineWidth: () => 0,
+          hLineColor: () => mediumGray,
+          paddingTop: () => 4,
+          paddingBottom: () => 4
+        }
+      }
+    ]
+  })
+
+  // === PAGAMENTO ===
+  dd.content.push({ text: 'FORMAS DE PAGAMENTO', style: 'sectionTitle' })
+  if (budgetPayments.value && budgetPayments.value.length > 0) {
+    const payTableBody = [
+      [
+        { text: 'Meio de Pagamento', style: 'tableHeader' },
+        { text: 'Parcelas', style: 'tableHeader', alignment: 'center' },
+        { text: 'Valor Parcela', style: 'tableHeader', alignment: 'right' },
+        { text: 'Desconto', style: 'tableHeader', alignment: 'center' }
+      ]
+    ]
+    budgetPayments.value.forEach((pay, idx) => {
+      const rowColor = idx % 2 === 0 ? '#ffffff' : lightGray
+      payTableBody.push([
+        { text: pay.payment_name || '', fillColor: rowColor, style: 'tableCell' },
+        { text: pay.installments + 'x', alignment: 'center', fillColor: rowColor, style: 'tableCell' },
+        { text: formatMoney(pay.installment_value), alignment: 'right', fillColor: rowColor, style: 'tableCell' },
+        { text: pay.discount ? pay.discount + '%' : 'N/A', alignment: 'center', fillColor: rowColor, style: 'tableCell' }
+      ])
+    })
+    dd.content.push({
+      table: {
+        headerRows: 1,
+        widths: ['*', 60, 80, 60],
+        body: payTableBody
+      },
+      layout: {
+        hLineWidth: () => 0.5,
+        vLineWidth: () => 0,
+        hLineColor: () => mediumGray,
+        paddingLeft: () => 6,
+        paddingRight: () => 6,
+        paddingTop: () => 5,
+        paddingBottom: () => 5
+      }
+    })
+  } else {
+    dd.content.push({ text: 'Nenhuma forma de pagamento definida.', fontSize: 9, color: mutedText, italics: true })
+  }
+
+  // === OBSERVAÇÕES ===
+  dd.content.push({ text: 'OBSERVAÇÕES', style: 'sectionTitle' })
+  dd.content.push({
+    table: {
+      widths: ['*'],
+      body: [
+        [{
+          text: budget.value.notes || 'Nenhuma observação.',
+          fontSize: 9,
+          color: budget.value.notes ? darkText : mutedText,
+          italics: !budget.value.notes,
+          border: [false, false, false, false],
+          fillColor: lightGray,
+          margin: [8, 8, 8, 8]
+        }]
       ]
     },
     layout: 'noBorders'
   })
-  dd.content.push({ text: '\n' })
 
-  // pagamento
+  // === ASSINATURA ===
+  dd.content.push({ text: '', margin: [0, 40, 0, 0] })
   dd.content.push({
-    text: 'Forma de Pagamento',
-    style: 'sectionTitle'
+    columns: [
+      {
+        width: '*',
+        stack: [
+          { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 200, y2: 0, lineWidth: 0.5, lineColor: darkText }] },
+          { text: 'Assinatura do Responsável', fontSize: 8, color: mutedText, margin: [0, 4, 0, 0], alignment: 'center', width: 200 }
+        ],
+        alignment: 'center'
+      },
+      {
+        width: '*',
+        stack: [
+          { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 200, y2: 0, lineWidth: 0.5, lineColor: darkText }] },
+          { text: 'Assinatura do Cliente', fontSize: 8, color: mutedText, margin: [0, 4, 0, 0], alignment: 'center', width: 200 }
+        ],
+        alignment: 'center'
+      }
+    ]
   })
-  dd.content.push({
-    text: payment.value ? payment.value.name + '\n' + (payment.value.description || '') : 'N/A'
-  })
-  dd.content.push({ text: '\n' })
 
-  // observações
-
-  dd.content.push({
-    text: 'Observações',
-    style: 'sectionTitle'
-  })
-  dd.content.push({
-    text: budget.value.notes || 'N/A'
-  })
-
-  pdfMake.createPdf(dd).download('orcamento.pdf')
+  pdfMake.createPdf(dd).download('orcamento-' + budget.value.code + '.pdf')
 }
 
 const calculateTotalWithoutDiscount = (items) => {
@@ -600,6 +773,26 @@ const calculateTotalDiscount = (items) => {
   })
   return totalDiscount
 }
+
+const profitValue = computed(() => {
+  if (!budget.value) return 0
+  return budget.value.total_price - budget.value.total_cost
+})
+
+const profitMarginPercent = computed(() => {
+  if (!budget.value || !budget.value.total_price || budget.value.total_price <= 0) return 0
+  return ((profitValue.value / budget.value.total_price) * 100).toFixed(1)
+})
+
+const costBarPercent = computed(() => {
+  if (!budget.value || !budget.value.total_price || budget.value.total_price <= 0) return 0
+  return ((budget.value.total_cost / budget.value.total_price) * 100).toFixed(0)
+})
+
+const profitBarPercent = computed(() => {
+  if (!budget.value || !budget.value.total_price || budget.value.total_price <= 0) return 0
+  return (100 - parseFloat(costBarPercent.value)).toFixed(0)
+})
 
 </script>
 

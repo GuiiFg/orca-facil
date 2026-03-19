@@ -52,17 +52,7 @@
                 </FwbAutocomplete>
               </div>
             </div>
-            <div class="grow">
-              <p class="font-medium text-gray-900 dark:text-white mb-2">Meio de Pagamento:</p>
-              <div class="auto-complete-fixer">
-                <FwbAutocomplete class="bg-white dark:bg-gray-800" type="text" placeholder="Digite para buscar o cliente" v-model="form.payment_id.value" :options="form.payment_id.options"
-                  :validation-status="form.payment_id.status" :required="form.payment_id.required" display="name" @search="searchPayments">
-                  <template #validationMessage>
-                    <span v-for="msg in form.payment_id.errors" :key="msg">{{ msg }}</span>
-                  </template>
-                </FwbAutocomplete>
-              </div>
-            </div>
+
           </div>
           <div class="flex flex-row gap-5 mt-4">
             <div class="grow">
@@ -74,19 +64,18 @@
         </Forms>
       </template>
     </FwbModal>
-    <Tables v-if="budgets" :columns="['Código', 'Cliente', 'Pagamento', 'Valor', 'Custo', 'Simulado', 'Ações']" :page="currentPage"
+    <Tables v-if="budgets" :columns="['Código', 'Cliente', 'Valor', 'Custo', 'Simulado', 'Ações']" :page="currentPage"
       :totalPages="totalPages" :total="totalItems" v-on:update:page="handleUpdatePage" v-on:search="handleSearch"
       v-on:reload="handleSearchBudgets" v-on:new="onCreateNewBudget" hasSearch hasNew hasReload
       class="w-full p-5 mt-4">
       <fwb-table-row v-if="budgets.length === 0">
-        <td colspan="7" class="text-center py-4">
+        <td colspan="6" class="text-center py-4">
           Nenhum dado encontrado.
         </td>
       </fwb-table-row>
       <fwb-table-row v-else v-for="(budget, index) in budgets" :key="budget.id">
         <TableColumn isText :value="budget.code" />
         <TableColumn isText :value="budget.customer_name" />
-        <TableColumn isText :value="budget.payment_name" />
         <TableColumn isMoney :value="budget.total_price" />
         <TableColumn isMoney :value="budget.total_cost" />
         <TableColumn isMoney :value="budget.total_price - budget.total_cost" />
@@ -157,18 +146,6 @@ const searchCustomers = async (query) => {
   }))
 }
 
-const searchPayments = async (query) => {
-  if (!query || query.length < 1) {
-    form.value.payment_id.options = []
-    return
-  }
-  const response = await window.api.payment.search(query, 5, 1)
-  form.value.payment_id.options = response.data.map(payment => ({
-    id: payment.id,
-    name: payment.name,
-  }))
-}
-
 onMounted(() => {
   handleClear()
   currentPage.value = 1
@@ -190,8 +167,6 @@ const handleEdit = (budget) => {
 const handleSave = () => {
   const finalForm = ref(JSON.parse(JSON.stringify(toRaw(form.value))))
   if (form.value.customer_id.value) finalForm.value.customer_id.value = form.value.customer_id.value.id
-  if (form.value.payment_id.value) finalForm.value.payment_id.value = form.value.payment_id.value.id
-
 
   const isValid = FormHelpers.validateForm(finalForm.value)
   if (!isValid) return
