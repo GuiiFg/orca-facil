@@ -103,6 +103,7 @@ import TableColumn from '@/components/dataManagers/TableColumn/tableColumn.vue'
 import MobileCard from '@/components/dataManagers/MobileCard/mobileCard.vue'
 import { ref, onMounted, toRaw } from 'vue'
 import FormHelpers from '@/helpers/formHelpers.js'
+import { api } from '@/services/api.js'
 import PaymentsForm from './form'
 import PaymentsData from '@/shared/models/payments'
 
@@ -127,7 +128,7 @@ const handleSearch = async (query) => {
 }
 
 const handleSearchPayments = async () => {
-  const response = await window.api.payment.search(searchQuery.value, 5, currentPage.value)
+  const response = await api.payment.search(searchQuery.value, 5, currentPage.value)
   const { data, total, pages } = response
   payments.value = data
   totalPages.value = pages
@@ -170,7 +171,7 @@ const handleSave = () => {
 
 const handleUpdate = () => {
   const value = JSON.parse(JSON.stringify(toRaw(data.value)))
-  window.api.payment.update(value)
+  api.payment.update(value)
   handleClear()
   handleSearchPayments()
   showFormModal.value = false
@@ -178,7 +179,7 @@ const handleUpdate = () => {
 
 const handleCreate = async () => {
   const value = JSON.parse(JSON.stringify(toRaw(data.value)))
-  await window.api.payment.add(value)
+  await api.payment.add(value)
   handleClear()
   await handleSearchPayments()
   showFormModal.value = false
@@ -186,7 +187,7 @@ const handleCreate = async () => {
 
 const handleDelete = async (payment) => {
   if (!payment || !payment.id) return
-  await window.api.payment.delete(payment.id)
+  await api.payment.delete(payment.id)
   await handleSearchPayments()
 }
 

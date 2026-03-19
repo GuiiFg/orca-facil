@@ -37,11 +37,23 @@ import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
 import { fab } from '@fortawesome/free-brands-svg-icons'
 import { vMaska } from 'maska/vue'
+import { initApi } from './services/api.js'
 
 library.add(fas, far, fab)
 
-createApp(App)
+// Initialize API (Electron or Capacitor) then mount
+initApi().then(() => {
+  createApp(App)
     .use(router)
     .directive("maska", vMaska)
     .component('font-awesome-icon', FontAwesomeIcon)
     .mount('#app');
+}).catch((err) => {
+  console.warn('API init warning (expected in Electron):', err.message)
+  // Fallback: mount anyway (Electron uses window.api directly)
+  createApp(App)
+    .use(router)
+    .directive("maska", vMaska)
+    .component('font-awesome-icon', FontAwesomeIcon)
+    .mount('#app');
+})

@@ -100,6 +100,7 @@ import Forms from '@/components/dataManagers/Forms/forms.vue'
 import BudgetPaymentData from '@/shared/models/budgetPayment.js'
 import BudgetPaymentForm from './budgetPaymentForm'
 import FormHelpers from '@/helpers/formHelpers.js'
+import { api } from '@/services/api.js'
 
 const props = defineProps(['budgetTotal'])
 const form = ref({ ...BudgetPaymentForm })
@@ -131,12 +132,12 @@ onMounted(() => {
 
 const handleEditItem = async (payment_id) => {
   handleClear()
-  const response = await window.api.budgetPayment.getById(payment_id)
+  const response = await api.budgetPayment.getById(payment_id)
   const { budgetPayment } = response
   FormHelpers.loadForm(form.value, budgetPayment)
   data = ref({ ...budgetPayment })
 
-  const paymentResponse = await window.api.payment.getById(budgetPayment.payment_id)
+  const paymentResponse = await api.payment.getById(budgetPayment.payment_id)
   const { payment } = paymentResponse
   const p = {
     id: payment.id,
@@ -157,7 +158,7 @@ const searchPayments = async (query) => {
     form.value.payment_id.options = []
     return
   }
-  const response = await window.api.payment.search(query, 5, 1)
+  const response = await api.payment.search(query, 5, 1)
   const paymentsResponse = response.data
   if (paymentsResponse && paymentsResponse.length > 0) {
     form.value.payment_id.options = paymentsResponse.map(payment => ({

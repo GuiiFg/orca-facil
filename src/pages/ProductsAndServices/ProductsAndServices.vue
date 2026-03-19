@@ -168,6 +168,7 @@ import MobileCard from '@/components/dataManagers/MobileCard/mobileCard.vue'
 import MobileCardField from '@/components/dataManagers/MobileCard/mobileCardField.vue'
 import { ref, onMounted, toRaw } from 'vue'
 import FormHelpers from '@/helpers/formHelpers.js'
+import { api } from '@/services/api.js'
 import ProductsForm from './form'
 import ProductsData from '@/shared/models/productsAndServices'
 
@@ -192,7 +193,7 @@ const handleSearch = async (query) => {
 }
 
 const handleSearchProducts = async () => {
-  const response = await window.api.product.search(searchQuery.value, 5, currentPage.value)
+  const response = await api.product.search(searchQuery.value, 5, currentPage.value)
   const { data, total, pages } = response
   products.value = data
   totalPages.value = pages
@@ -241,7 +242,7 @@ const handleSave = () => {
 
 const handleUpdate = () => {
   const value = JSON.parse(JSON.stringify(toRaw(data.value)))
-  window.api.product.update(value)
+  api.product.update(value)
   handleClear()
   handleSearchProducts()
   showFormModal.value = false
@@ -249,7 +250,7 @@ const handleUpdate = () => {
 
 const handleCreate = async () => {
   const value = JSON.parse(JSON.stringify(toRaw(data.value)))
-  await window.api.product.add(value)
+  await api.product.add(value)
   handleClear()
   await handleSearchProducts()
   showFormModal.value = false
@@ -257,7 +258,7 @@ const handleCreate = async () => {
 
 const handleDelete = async (product) => {
   if (!product || !product.id) return
-  await window.api.product.delete(product.id)
+  await api.product.delete(product.id)
   await handleSearchProducts()
 }
 

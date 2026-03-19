@@ -122,6 +122,7 @@ import Forms from '@/components/dataManagers/Forms/forms.vue'
 import BudgetItemData from '@/shared/models/budgetItem.js'
 import BudgetItemForm from './budgetItemForm'
 import FormHelpers from '@/helpers/formHelpers.js'
+import { api } from '@/services/api.js'
 
 const form = ref({ ...BudgetItemForm })
 let data = ref(null)
@@ -140,12 +141,12 @@ onMounted(() => {
 
 const handleEditItem = async (item_id) => {
   handleClear()
-  const response = await window.api.budgetItem.getById(item_id)
+  const response = await api.budgetItem.getById(item_id)
   const { budgetItem } = response
   FormHelpers.loadForm(form.value, budgetItem)
   data = ref({ ...budgetItem })
 
-  const prodResponse = await window.api.product.getById(budgetItem.product_id)
+  const prodResponse = await api.product.getById(budgetItem.product_id)
   const { product } = prodResponse
   const p = {
     id: product.id,
@@ -173,7 +174,7 @@ const searchProducts = async (query) => {
     form.value.product_id.options = []
     return
   }
-  const response = await window.api.product.search(query, 5, 0)
+  const response = await api.product.search(query, 5, 0)
   const { data } = response
   if (data && data.length > 0) {
     form.value.product_id.options = data.map(item => ({

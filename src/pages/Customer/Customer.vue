@@ -230,6 +230,7 @@ import MobileCard from '@/components/dataManagers/MobileCard/mobileCard.vue'
 import MobileCardField from '@/components/dataManagers/MobileCard/mobileCardField.vue'
 import { ref, onMounted, computed, toRaw } from 'vue'
 import FormHelpers from '@/helpers/formHelpers.js'
+import { api } from '@/services/api.js'
 import CustomerForm from './form'
 import CustomerData from '@/shared/models/customer'
 
@@ -266,7 +267,7 @@ const handleSearch = async (query) => {
 }
 
 const handleSearchClients = async () => {
-  const response = await window.api.customer.search(searchQuery.value, 5, currentPage.value)
+  const response = await api.customer.search(searchQuery.value, 5, currentPage.value)
   const { data, total, pages } = response
   customers.value = data
   totalPages.value = pages
@@ -309,7 +310,7 @@ const handleSave = () => {
 
 const handleUpdate = () => {
   const value = JSON.parse(JSON.stringify(toRaw(data.value)))
-  window.api.customer.update(value)
+  api.customer.update(value)
   handleClear()
   handleSearchClients()
   showFormModal.value = false
@@ -317,7 +318,7 @@ const handleUpdate = () => {
 
 const handleCreate = async () => {
   const value = JSON.parse(JSON.stringify(toRaw(data.value)))
-  await window.api.customer.add(value)
+  await api.customer.add(value)
   handleClear()
   await handleSearchClients()
   showFormModal.value = false
@@ -325,7 +326,7 @@ const handleCreate = async () => {
 
 const handleDelete = async (customer) => {
   if (!customer || !customer.id) return
-  await window.api.customer.delete(customer.id)
+  await api.customer.delete(customer.id)
   await handleSearchClients()
 }
 

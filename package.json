@@ -13,7 +13,10 @@
     "postinstall": "install-app-deps",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
     "build": "vite build",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "build:web": "vite build --config vite.config.mjs",
+    "cap:sync": "npx cap sync",
+    "cap:open": "npx cap open android"
   },
   "keywords": [],
   "author": {
@@ -44,6 +47,12 @@
     "vite": "^5.4.21"
   },
   "dependencies": {
+    "@capacitor-community/sqlite": "^8.0.1",
+    "@capacitor/android": "^8.2.0",
+    "@capacitor/cli": "^7.6.0",
+    "@capacitor/core": "^8.2.0",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/share": "^8.0.1",
     "@fortawesome/fontawesome-svg-core": "^7.1.0",
     "@fortawesome/free-brands-svg-icons": "^7.1.0",
     "@fortawesome/free-regular-svg-icons": "^7.1.0",

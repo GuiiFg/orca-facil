@@ -333,6 +333,7 @@ import BudgetPaymentModal from './modals/budgetPaymentModal.vue'
 import EditForm from './form.js'
 import Forms from '@/components/dataManagers/Forms/forms.vue'
 import FormHelpers from '@/helpers/formHelpers.js'
+import { api } from '@/services/api.js'
 import pdfMake from '@/utils/pdfmake'
 
 const router = useRouter()
@@ -366,11 +367,11 @@ onMounted(async () => {
 
 const loadBudgetDetails = async () => {
   customer.value = null
-  const response = await window.api.budget.getById(budgetId)
+  const response = await api.budget.getById(budgetId)
   budget.value = response.budget
 
   if (budget.value.customer_id) {
-    const customerResponse = await window.api.customer.getById(budget.value.customer_id)
+    const customerResponse = await api.customer.getById(budget.value.customer_id)
     customer.value = customerResponse.customer
   }
 
@@ -383,7 +384,7 @@ const handleSearchBudgetPayments = async () => {
     budget_id: budgetId,
     search: searchPaymentQuery.value
   }
-  const response = await window.api.budgetPayment.search(filters, 50, 1)
+  const response = await api.budgetPayment.search(filters, 50, 1)
   budgetPayments.value = response.data
 }
 
@@ -394,13 +395,13 @@ const handleSearchPayments = async (query) => {
 
 const handleCreatePayment = async (paymentData) => {
   paymentData.budget_id = budgetId
-  await window.api.budgetPayment.add(paymentData)
+  await api.budgetPayment.add(paymentData)
   await loadBudgetDetails()
 }
 
 const handleUpdatePayment = async (paymentData) => {
   paymentData.budget_id = budgetId
-  await window.api.budgetPayment.update(paymentData)
+  await api.budgetPayment.update(paymentData)
   await loadBudgetDetails()
 }
 
@@ -414,7 +415,7 @@ const handleEditPayment = async (paymentId) => {
 }
 
 const handleDeletePayment = async (paymentId) => {
-  await window.api.budgetPayment.delete(paymentId)
+  await api.budgetPayment.delete(paymentId)
   await loadBudgetDetails()
 }
 
@@ -428,7 +429,7 @@ const handleSearchBudgetItems = async () => {
     budget_id: budgetId,
     search: searchQuery.value
   }
-  const response = await window.api.budgetItem.search(filters, 5, currentPage.value)
+  const response = await api.budgetItem.search(filters, 5, currentPage.value)
   const { data, total, pages } = response
   budgetItems.value = data
   totalPages.value = pages
@@ -437,15 +438,15 @@ const handleSearchBudgetItems = async () => {
 
 const handleCreateItem = async (itemData) => {
   itemData.budget_id = budgetId
-  await window.api.budgetItem.add(itemData)
-  await window.api.budget.updateTotals(budgetId)
+  await api.budgetItem.add(itemData)
+  await api.budget.updateTotals(budgetId)
   await loadBudgetDetails()
 }
 
 const handleUpdateItem = async (itemData) => {
   itemData.budget_id = budgetId
-  await window.api.budgetItem.update(itemData)
-  await window.api.budget.updateTotals(budgetId)
+  await api.budgetItem.update(itemData)
+  await api.budget.updateTotals(budgetId)
   await loadBudgetDetails()
 }
 
@@ -460,8 +461,8 @@ const handleEditItem = async (itemId) => {
 }
 
 const handleDeleteItem = async (itemId) => {
-  await window.api.budgetItem.delete(itemId)
-  await window.api.budget.updateTotals(budgetId)
+  await api.budgetItem.delete(itemId)
+  await api.budget.updateTotals(budgetId)
   await loadBudgetDetails()
 }
 
@@ -477,7 +478,7 @@ const searchCustomers = async (query) => {
     editForm.value.customer_id.options = []
     return
   }
-  const response = await window.api.customer.search(query, 5, 1)
+  const response = await api.customer.search(query, 5, 1)
   editForm.value.customer_id.options = response.data.map(customer => ({
     id: customer.id,
     name: customer.name + ' ' + customer.surname,
@@ -499,7 +500,7 @@ const handleSave = async () => {
   budgetData.customer_id = finalForm.value.customer_id.value
   budgetData.notes = finalForm.value.notes.value
 
-  await window.api.budget.update(budgetData)
+  await api.budget.update(budgetData)
 
   handleClear()
   showAddClientModal.value = false
@@ -556,7 +557,7 @@ const handleGeneratePdf = async () => {
     defaultStyle: { fontSize: 9, color: darkText }
   }
 
-  const settingResponse = await window.api.setting.get()
+  const settingResponse = await api.setting.get()
   const setting = settingResponse.setting || null
 
   // === HEADER ===

@@ -51,6 +51,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import Forms from '@/components/dataManagers/Forms/forms.vue'
 import { ref, toRaw, onMounted } from 'vue'
 import FormHelpers from '@/helpers/formHelpers.js'
+import { api } from '@/services/api.js'
 import SettingsForm from './form'
 
 const form = ref({ ...SettingsForm })
@@ -58,7 +59,7 @@ let data = ref(null)
 const imgPrev = ref(null)
 
 onMounted(async () => {
-  const response = await window.api.setting.get()
+  const response = await api.setting.get()
   data.value = response.setting || null
 
   if (data.value) {
@@ -68,11 +69,11 @@ onMounted(async () => {
 })
 
 const selectLogo = async () => {
-  const path = await window.api.selectFile()
+  const path = await api.selectFile()
   if (path) {
     form.value.budget_image.value = path
 
-    imgPrev.value = await window.api.fileToBase64(form.value.budget_image.value)
+    imgPrev.value = await api.fileToBase64(form.value.budget_image.value)
   }
 }
 
@@ -81,23 +82,23 @@ const handleSave = async () => {
   if (!isValid) return
 
   const rawForm = toRaw(form.value)
-  const response = await window.api.setting.get()
+  const response = await api.setting.get()
   const currentSetting = response.setting || null
 
   if (rawForm.budget_image.value) {
-    const base64 = await window.api.fileToBase64(rawForm.budget_image.value)
+    const base64 = await api.fileToBase64(rawForm.budget_image.value)
     console.log('base64Data:', base64)
     imgPrev.value = base64
   }
   
   if (!currentSetting) {
     console.log('creating setting')
-    await window.api.setting.create({
+    await api.setting.create({
       budget_image: imgPrev.value
     })
   } else {
     currentSetting.budget_image = imgPrev.value
-    await window.api.setting.update({
+    await api.setting.update({
       ...currentSetting
     })
   }

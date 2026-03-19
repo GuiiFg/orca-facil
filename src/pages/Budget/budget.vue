@@ -106,6 +106,7 @@ import MobileCard from '@/components/dataManagers/MobileCard/mobileCard.vue'
 import MobileCardField from '@/components/dataManagers/MobileCard/mobileCardField.vue'
 import { ref, onMounted, toRaw } from 'vue'
 import FormHelpers from '@/helpers/formHelpers.js'
+import { api } from '@/services/api.js'
 import BudgetForm from './form'
 import BudgetData from '@/shared/models/budget'
 import { useRouter } from 'vue-router'
@@ -133,7 +134,7 @@ const handleSearch = async (query) => {
 }
 
 const handleSearchBudgets = async () => {
-  const response = await window.api.budget.search(searchQuery.value, 5, currentPage.value)
+  const response = await api.budget.search(searchQuery.value, 5, currentPage.value)
   const { data, total, pages } = response
   budgets.value = data
   totalPages.value = pages
@@ -141,7 +142,7 @@ const handleSearchBudgets = async () => {
 }
 
 const generateNextCode = async () => {
-  const response = await window.api.budget.search(null, 1, 1)
+  const response = await api.budget.search(null, 1, 1)
   const { total } = response
   return 'ORC-' + String(total + 1).padStart(6, '0')
 }
@@ -151,7 +152,7 @@ const searchCustomers = async (query) => {
     form.value.customer_id.options = []
     return
   }
-  const response = await window.api.customer.search(query, 5, 1)
+  const response = await api.customer.search(query, 5, 1)
   form.value.customer_id.options = response.data.map(customer => ({
     id: customer.id,
     name: customer.name + ' ' + customer.surname,
@@ -202,7 +203,7 @@ const handleSave = () => {
 
 const handleUpdate = () => {
   const value = JSON.parse(JSON.stringify(toRaw(data.value)))
-  window.api.budget.update(value)
+  api.budget.update(value)
   handleClear()
   handleSearchBudgets()
   showFormModal.value = false
@@ -210,7 +211,7 @@ const handleUpdate = () => {
 
 const handleCreate = async () => {
   const value = JSON.parse(JSON.stringify(toRaw(data.value)))
-  await window.api.budget.add(value)
+  await api.budget.add(value)
   handleClear()
   await handleSearchBudgets()
   showFormModal.value = false
@@ -218,7 +219,7 @@ const handleCreate = async () => {
 
 const handleDelete = async (budget) => {
   if (!budget || !budget.id) return
-  await window.api.budget.delete(budget.id)
+  await api.budget.delete(budget.id)
   await handleSearchBudgets()
 }
 
