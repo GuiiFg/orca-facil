@@ -5,7 +5,7 @@
       {{ props.description }}
     </p>
   </div>
-  <fwb-card class="w-full p-5 mt-4">
+  <fwb-card class="w-full p-5 mt-4" style="min-width: 250px;">
     <slot />
     <div class="flex justify-between mt-4">
       <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer" @click="handleEmit('form:save')">

@@ -182,6 +182,7 @@ const searchProducts = async (query) => {
       list_name: item.code + ' - ' + item.name + ' (' + (item.type === 0 ? 'Produto' : 'Serviço') + ')',
       ...item
     }))
+    FormHelpers.forceAutocompleteUpdate()
   }
 };
 

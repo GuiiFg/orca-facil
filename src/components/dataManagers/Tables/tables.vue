@@ -1,5 +1,5 @@
 <template>
-  <FwbCard>
+  <FwbCard class="w-full mb-4" style="min-width: 250px;">
     <div class="flex flex-col sm:flex-row gap-3 sm:gap-5">
       <div class="grow" v-if="props.hasSearch">
         <fwb-input type="text" placeholder="Pesquisar..." class="mb-4" v-model="searchQuery">

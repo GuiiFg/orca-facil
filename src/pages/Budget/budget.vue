@@ -156,7 +156,9 @@ const searchCustomers = async (query) => {
   form.value.customer_id.options = response.data.map(customer => ({
     id: customer.id,
     name: customer.name + ' ' + customer.surname,
+    ...customer
   }))
+  FormHelpers.forceAutocompleteUpdate()
 }
 
 const formatMoneyMobile = (value) => {

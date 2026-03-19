@@ -166,6 +166,7 @@ const searchPayments = async (query) => {
       name: payment.name,
       ...payment
     }))
+    FormHelpers.forceAutocompleteUpdate()
   }
 };
 

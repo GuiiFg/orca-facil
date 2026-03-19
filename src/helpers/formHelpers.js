@@ -56,9 +56,20 @@ function loadForm(form, data) {
   }
 }
 
+function forceAutocompleteUpdate() {
+  setTimeout(() => {
+    const input = document.activeElement;
+    if (input && input.tagName === 'INPUT') {
+      input.dispatchEvent(new Event('focus', { bubbles: true }));
+      input.dispatchEvent(new Event('click', { bubbles: true }));
+    }
+  }, 100);
+}
+
 export default {
   validateForm,
   clearForm,
   loadData,
-  loadForm
+  loadForm,
+  forceAutocompleteUpdate
 };

@@ -8,8 +8,10 @@
 /* add Flowbite Vue directory using @source directive */
 @source "../node_modules/flowbite-vue";
 
-body {
-
+html, body, #app {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 /* ===== Flowbite Modal scroll fix for small screens ===== */
@@ -19,6 +21,9 @@ div[modal-backdrop] + div,
 .fixed.inset-0[role="dialog"],
 div.fixed.inset-0.z-50 {
   overflow-y: auto !important;
+  /* Protect modals from overflowing on very small screens */
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
 }
 
 /* Modal wrapper — center on large screens, scroll on small */
@@ -26,7 +31,10 @@ div[modal-backdrop] + div > div,
 .fixed.inset-0[role="dialog"] > div {
   max-height: 100vh;
   max-height: 100dvh;
+  max-width: 100vw;
   overflow-y: auto;
+  overflow-x: hidden;
+  margin: 0 auto;
 }
 
 /* Modal content itself */
@@ -34,6 +42,18 @@ div[modal-backdrop] + div > div,
 .relative.bg-white.dark\:bg-gray-700.rounded-lg {
   max-height: 90vh;
   max-height: 90dvh;
+  max-width: calc(100vw - 1rem) !important;
+  width: 100% !important;
   overflow-y: auto;
+  overflow-x: hidden;
   margin: 1rem auto;
+}
+
+/* ===== Safe Area for Mobile Notch (Capacitor) ===== */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0px) !important;
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px) !important;
 }

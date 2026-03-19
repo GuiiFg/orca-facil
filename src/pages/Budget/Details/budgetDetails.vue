@@ -482,7 +482,9 @@ const searchCustomers = async (query) => {
   editForm.value.customer_id.options = response.data.map(customer => ({
     id: customer.id,
     name: customer.name + ' ' + customer.surname,
+    ...customer
   }))
+  FormHelpers.forceAutocompleteUpdate()
 }
 
 const handleClear = () => {
@@ -777,7 +779,13 @@ const handleGeneratePdf = async () => {
     ]
   })
 
-  pdfMake.createPdf(dd).download('orcamento-' + budget.value.code + '.pdf')
+  if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+    pdfMake.createPdf(dd).getBuffer(async (buffer) => {
+      await api.savePdf(buffer, 'orcamento-' + budget.value.code + '.pdf')
+    })
+  } else {
+    pdfMake.createPdf(dd).download('orcamento-' + budget.value.code + '.pdf')
+  }
 }
 
 const calculateTotalWithoutDiscount = (items) => {
