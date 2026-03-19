@@ -273,6 +273,9 @@
         </MobileCard>
       </template>
     </Tables>
+    <div v-if="testeMessagePdf" class="mt-5 mb-5 text-center font-bold text-lg text-blue-600">
+      {{ testeMessagePdf }}
+    </div>
 
     <Tables
       class="w-full p-5 mt-4"
@@ -306,13 +309,13 @@
         </MobileCard>
       </template>
     </Tables>
-    <div class="mt-4 flex justify-end">
+    <BudgetPaymentModal :budgetTotal="budget.total_price" ref="modalPaymentRef" v-if="showBudgetPaymentModal" @close="showBudgetPaymentModal = false" @payment:create="handleCreatePayment" @payment:update="handleUpdatePayment"/>
+    <BudgetItemModal ref="modalItemRef" v-if="showBudgetItemModal" @close="showBudgetItemModal = false" @item:create="handleCreateItem" @item:update="handleUpdateItem"/>
+    <div class="mt-4 mb-20 flex justify-end">
       <FwbButton color="green" @click="handleGeneratePdf">
         <FontAwesomeIcon icon="fas fa-file-pdf" /> Gerar PDF do Orçamento
       </FwbButton>
     </div>
-    <BudgetPaymentModal :budgetTotal="budget.total_price" ref="modalPaymentRef" v-if="showBudgetPaymentModal" @close="showBudgetPaymentModal = false" @payment:create="handleCreatePayment" @payment:update="handleUpdatePayment"/>
-    <BudgetItemModal ref="modalItemRef" v-if="showBudgetItemModal" @close="showBudgetItemModal = false" @item:create="handleCreateItem" @item:update="handleUpdateItem"/>
   </div>
 </template>
 
@@ -334,7 +337,8 @@ import EditForm from './form.js'
 import Forms from '@/components/dataManagers/Forms/forms.vue'
 import FormHelpers from '@/helpers/formHelpers.js'
 import { api } from '@/services/api.js'
-import pdfMake from '@/utils/pdfmake'
+import { jsPDF } from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 const router = useRouter()
 
@@ -352,6 +356,7 @@ const searchQuery = ref(null)
 const searchPaymentQuery = ref(null)
 const showAddClientModal = ref(false)
 const editForm = ref({ ...EditForm })
+const testeMessagePdf = ref(null)
 
 const modalItemRef = ref(null)
 const modalPaymentRef = ref(null)
@@ -525,268 +530,241 @@ const onShowAddClientModal = () => {
 }
 
 const handleGeneratePdf = async () => {
-  const primaryColor = '#1e3a5f'
-  const accentColor = '#2563eb'
-  const lightGray = '#f8fafc'
-  const mediumGray = '#e2e8f0'
-  const darkText = '#1e293b'
-  const mutedText = '#64748b'
+  testeMessagePdf.value = 'Gerando PDF com jsPDF...'
 
-  const dd = {
-    pageSize: 'A4',
-    pageMargins: [40, 40, 40, 60],
-    footer: function(currentPage, pageCount) {
-      return {
-        columns: [
-          { text: 'Orçamento gerado pelo sistema OrcaFácil', fontSize: 7, color: mutedText, margin: [40, 20, 0, 0] },
-          { text: 'Página ' + currentPage + ' de ' + pageCount, fontSize: 7, color: mutedText, alignment: 'right', margin: [0, 20, 40, 0] }
-        ]
+  try {
+    const doc = new jsPDF()
+
+    const primaryColor = [30, 58, 95]
+    const accentColor = [37, 99, 235]
+    const darkText = [30, 41, 59]
+    const mutedText = [100, 116, 139]
+
+    testeMessagePdf.value = 'Buscando configurações...'
+    const settingResponse = await api.setting.get()
+    const setting = settingResponse.setting || null
+
+    let startY = 20
+
+    if (setting && setting.budget_image) {
+      try {
+        doc.addImage(setting.budget_image, 'JPEG', 14, startY - 8, 30, 30)
+      } catch (e) {
+        console.warn('Erro ao inserir logo no jsPDF', e)
       }
-    },
-    content: [],
-    styles: {
-      title: { fontSize: 22, bold: true, color: primaryColor },
-      subTitle: { fontSize: 9, color: mutedText },
-      sectionTitle: { fontSize: 12, bold: true, color: primaryColor, margin: [0, 20, 0, 8] },
-      tableHeader: { bold: true, fontSize: 9, color: '#ffffff', fillColor: primaryColor },
-      tableCell: { fontSize: 9, color: darkText },
-      tableCellRight: { fontSize: 9, color: darkText, alignment: 'right' },
-      totalLabel: { fontSize: 10, color: darkText },
-      totalValue: { fontSize: 10, color: darkText, bold: true },
-      grandTotalLabel: { fontSize: 12, color: primaryColor, bold: true },
-      grandTotalValue: { fontSize: 12, color: primaryColor, bold: true }
-    },
-    defaultStyle: { fontSize: 9, color: darkText }
-  }
+    }
 
-  const settingResponse = await api.setting.get()
-  const setting = settingResponse.setting || null
+    doc.setFontSize(22)
+    doc.setTextColor(...primaryColor)
+    doc.text('ORÇAMENTO', 196, startY, { align: 'right' })
+    
+    doc.setDrawColor(...accentColor)
+    doc.setLineWidth(1)
+    doc.line(140, startY + 2, 196, startY + 2)
 
-  // === HEADER ===
-  const headerColumns = []
-  if (setting && setting.budget_image) {
-    headerColumns.push({ image: setting.budget_image, width: 65 })
-  }
-  headerColumns.push({
-    stack: [
-      { text: 'ORÇAMENTO', style: 'title' },
-      { canvas: [{ type: 'line', x1: 0, y1: 2, x2: 150, y2: 2, lineWidth: 2, lineColor: accentColor }] },
-      { text: ' ', fontSize: 4 },
-      { text: 'Código: ' + budget.value.code, style: 'subTitle' },
-      { text: 'Data: ' + new Date().toLocaleDateString('pt-BR'), style: 'subTitle' }
-    ],
-    alignment: 'right'
-  })
-  dd.content.push({ columns: headerColumns })
+    doc.setFontSize(9)
+    doc.setTextColor(...mutedText)
+    doc.text('Código: ' + budget.value.code, 196, startY + 8, { align: 'right' })
+    doc.text('Data: ' + new Date().toLocaleDateString('pt-BR'), 196, startY + 13, { align: 'right' })
 
-  // Separator line
-  dd.content.push({ canvas: [{ type: 'line', x1: 0, y1: 10, x2: 515, y2: 10, lineWidth: 0.5, lineColor: mediumGray }] })
+    startY += 25
 
-  // === CLIENTE ===
-  dd.content.push({ text: 'DADOS DO CLIENTE', style: 'sectionTitle' })
-  if (customer.value) {
-    dd.content.push({
-      table: {
-        widths: ['*', '*'],
+    doc.setDrawColor(226, 232, 240)
+    doc.setLineWidth(0.5)
+    doc.line(14, startY, 196, startY)
+    startY += 10
+
+    doc.setFontSize(12)
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(...primaryColor)
+    doc.text('DADOS DO CLIENTE', 14, startY)
+    startY += 5
+
+    if (customer.value) {
+      autoTable(doc, {
+        startY: startY,
+        theme: 'plain',
+        styles: { fillColor: [248, 250, 252], cellPadding: 4, fontSize: 9, textColor: darkText },
         body: [
           [
-            {
-              stack: [
-                { text: (customer.value.name || '') + ' ' + (customer.value.surname || ''), bold: true, fontSize: 11, color: darkText },
-                { text: ' ', fontSize: 4 },
-                { text: 'Documento: ' + (customer.value.document || 'N/A'), fontSize: 9, color: mutedText },
-                { text: 'Email: ' + (customer.value.email || 'N/A'), fontSize: 9, color: mutedText },
-                { text: 'Telefone: ' + (customer.value.phone || 'N/A'), fontSize: 9, color: mutedText }
-              ],
-              border: [false, false, false, false],
-              fillColor: lightGray,
-              margin: [8, 8, 8, 8]
-            },
-            {
-              stack: [
-                { text: 'Endereço', bold: true, fontSize: 9, color: darkText },
-                { text: ' ', fontSize: 4 },
-                { text: (customer.value.street || 'N/A') + ', ' + (customer.value.number || 'S/N'), fontSize: 9, color: mutedText },
-                { text: (customer.value.district || '') + ' - ' + (customer.value.city || '') + '/' + (customer.value.state || ''), fontSize: 9, color: mutedText },
-                { text: 'CEP: ' + (customer.value.zipcode || 'N/A'), fontSize: 9, color: mutedText }
-              ],
-              border: [false, false, false, false],
-              fillColor: lightGray,
-              margin: [8, 8, 8, 8]
-            }
+            'Nome: ' + (customer.value.name || '') + ' ' + (customer.value.surname || '') + '\nDocumento: ' + (customer.value.document || 'N/A') + '\nEmail: ' + (customer.value.email || 'N/A') + '\nTelefone: ' + (customer.value.phone || 'N/A'),
+            'Endereço\n' + (customer.value.street || 'N/A') + ', ' + (customer.value.number || 'S/N') + '\n' + (customer.value.district || '') + ' - ' + (customer.value.city || '') + '/' + (customer.value.state || '') + '\nCEP: ' + (customer.value.zipcode || 'N/A')
           ]
-        ]
-      },
-      layout: 'noBorders'
-    })
-  }
-
-  // === ITENS ===
-  dd.content.push({ text: 'ITENS DO ORÇAMENTO', style: 'sectionTitle' })
-  const itemsTableBody = [
-    [
-      { text: '#', style: 'tableHeader', alignment: 'center' },
-      { text: 'Descrição', style: 'tableHeader' },
-      { text: 'Qtd', style: 'tableHeader', alignment: 'center' },
-      { text: 'Valor Unit.', style: 'tableHeader', alignment: 'right' },
-      { text: 'Desc.', style: 'tableHeader', alignment: 'center' },
-      { text: 'Total', style: 'tableHeader', alignment: 'right' }
-    ]
-  ]
-  budgetItems.value.forEach((item, idx) => {
-    const rowColor = idx % 2 === 0 ? '#ffffff' : lightGray
-    itemsTableBody.push([
-      { text: (idx + 1).toString(), alignment: 'center', fillColor: rowColor, style: 'tableCell' },
-      { text: item.product_name || '', fillColor: rowColor, style: 'tableCell' },
-      { text: item.quantity.toString(), alignment: 'center', fillColor: rowColor, style: 'tableCell' },
-      { text: formatMoney(item.unit_price), alignment: 'right', fillColor: rowColor, style: 'tableCell' },
-      { text: item.discount ? item.discount + '%' : '0%', alignment: 'center', fillColor: rowColor, style: 'tableCell' },
-      { text: formatMoney(item.total_price), alignment: 'right', fillColor: rowColor, style: 'tableCell' }
-    ])
-  })
-  dd.content.push({
-    table: {
-      headerRows: 1,
-      widths: [25, '*', 35, 70, 40, 75],
-      body: itemsTableBody
-    },
-    layout: {
-      hLineWidth: () => 0.5,
-      vLineWidth: () => 0,
-      hLineColor: () => mediumGray,
-      paddingLeft: () => 6,
-      paddingRight: () => 6,
-      paddingTop: () => 5,
-      paddingBottom: () => 5
+        ],
+        margin: { left: 14, right: 14 }
+      })
+      startY = doc.lastAutoTable.finalY + 10
     }
-  })
 
-  // === TOTAIS ===
-  dd.content.push({ text: '', margin: [0, 10, 0, 0] })
-  dd.content.push({
-    columns: [
-      { width: '*', text: '' },
-      {
-        width: 220,
-        table: {
-          widths: ['*', 'auto'],
-          body: [
-            [
-              { text: 'Subtotal', style: 'totalLabel', border: [false, false, false, true], borderColor: [null, null, null, mediumGray] },
-              { text: formatMoney(calculateTotalWithoutDiscount(budgetItems.value) || 0), style: 'totalValue', alignment: 'right', border: [false, false, false, true], borderColor: [null, null, null, mediumGray] }
-            ],
-            [
-              { text: 'Descontos', style: 'totalLabel', border: [false, false, false, true], borderColor: [null, null, null, mediumGray] },
-              { text: '- ' + formatMoney(calculateTotalDiscount(budgetItems.value) || 0), style: 'totalValue', alignment: 'right', color: '#ef4444', border: [false, false, false, true], borderColor: [null, null, null, mediumGray] }
-            ],
-            [
-              { text: 'TOTAL GERAL', style: 'grandTotalLabel', border: [false, false, false, false], margin: [0, 6, 0, 0] },
-              { text: formatMoney(budget.value.total_price), style: 'grandTotalValue', alignment: 'right', border: [false, false, false, false], margin: [0, 6, 0, 0] }
-            ]
-          ]
-        },
-        layout: {
-          hLineWidth: (i) => i === 0 ? 0 : 0.5,
-          vLineWidth: () => 0,
-          hLineColor: () => mediumGray,
-          paddingTop: () => 4,
-          paddingBottom: () => 4
+    testeMessagePdf.value = 'Construindo itens...'
+
+    doc.setFontSize(12)
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(...primaryColor)
+    doc.text('ITENS DO ORÇAMENTO', 14, startY)
+    
+    const itemsBody = budgetItems.value.map((item, idx) => [
+      (idx + 1).toString(),
+      item.product_name || '',
+      item.quantity.toString(),
+      formatMoney(item.unit_price),
+      item.discount ? item.discount + '%' : '0%',
+      formatMoney(item.total_price)
+    ])
+
+    autoTable(doc, {
+      startY: startY + 5,
+      head: [['#', 'Descrição', 'Qtd', 'Valor Unit.', 'Desc.', 'Total']],
+      body: itemsBody,
+      theme: 'striped',
+      headStyles: { fillColor: primaryColor, textColor: 255 },
+      styles: { fontSize: 9, cellPadding: 3, textColor: darkText },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 10 },
+        2: { halign: 'center', cellWidth: 15 },
+        3: { halign: 'right', cellWidth: 35 },
+        4: { halign: 'center', cellWidth: 20 },
+        5: { halign: 'right', cellWidth: 35 }
+      },
+      margin: { left: 14, right: 14 }
+    })
+    startY = doc.lastAutoTable.finalY + 10
+
+    const subtotal = calculateTotalWithoutDiscount(budgetItems.value) || 0
+    const discounts = calculateTotalDiscount(budgetItems.value) || 0
+    
+    autoTable(doc, {
+      startY: startY,
+      theme: 'plain',
+      body: [
+        ['Subtotal', formatMoney(subtotal)],
+        ['Descontos', '- ' + formatMoney(discounts)],
+        ['TOTAL GERAL', formatMoney(budget.value.total_price)]
+      ],
+      styles: { fontSize: 10, halign: 'right', textColor: darkText },
+      columnStyles: {
+        0: { fontStyle: 'bold', cellWidth: 40 },
+        1: { cellWidth: 40 }
+      },
+      margin: { left: 116 },
+      didParseCell: function(data) {
+        if (data.row.index === 1 && data.column.index === 1) {
+          data.cell.styles.textColor = [239, 68, 68]
+        }
+        if (data.row.index === 2) {
+          data.cell.styles.fontSize = 12
+          data.cell.styles.textColor = primaryColor
+          data.cell.styles.fontStyle = 'bold'
         }
       }
-    ]
-  })
+    })
+    startY = doc.lastAutoTable.finalY + 15
 
-  // === PAGAMENTO ===
-  dd.content.push({ text: 'FORMAS DE PAGAMENTO', style: 'sectionTitle' })
-  if (budgetPayments.value && budgetPayments.value.length > 0) {
-    const payTableBody = [
-      [
-        { text: 'Meio de Pagamento', style: 'tableHeader' },
-        { text: 'Parcelas', style: 'tableHeader', alignment: 'center' },
-        { text: 'Valor Parcela', style: 'tableHeader', alignment: 'right' },
-        { text: 'Desconto', style: 'tableHeader', alignment: 'center' }
-      ]
-    ]
-    budgetPayments.value.forEach((pay, idx) => {
-      const rowColor = idx % 2 === 0 ? '#ffffff' : lightGray
-      payTableBody.push([
-        { text: pay.payment_name || '', fillColor: rowColor, style: 'tableCell' },
-        { text: pay.installments + 'x', alignment: 'center', fillColor: rowColor, style: 'tableCell' },
-        { text: formatMoney(pay.installment_value), alignment: 'right', fillColor: rowColor, style: 'tableCell' },
-        { text: pay.discount ? pay.discount + '%' : 'N/A', alignment: 'center', fillColor: rowColor, style: 'tableCell' }
+    doc.setFontSize(12)
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(...primaryColor)
+    doc.text('FORMAS DE PAGAMENTO', 14, startY)
+
+    if (budgetPayments.value && budgetPayments.value.length > 0) {
+      const payBody = budgetPayments.value.map((pay) => [
+        pay.payment_name || '',
+        pay.installments + 'x',
+        formatMoney(pay.installment_value),
+        pay.discount ? pay.discount + '%' : '0%'
       ])
-    })
-    dd.content.push({
-      table: {
-        headerRows: 1,
-        widths: ['*', 60, 80, 60],
-        body: payTableBody
-      },
-      layout: {
-        hLineWidth: () => 0.5,
-        vLineWidth: () => 0,
-        hLineColor: () => mediumGray,
-        paddingLeft: () => 6,
-        paddingRight: () => 6,
-        paddingTop: () => 5,
-        paddingBottom: () => 5
-      }
-    })
-  } else {
-    dd.content.push({ text: 'Nenhuma forma de pagamento definida.', fontSize: 9, color: mutedText, italics: true })
-  }
 
-  // === OBSERVAÇÕES ===
-  dd.content.push({ text: 'OBSERVAÇÕES', style: 'sectionTitle' })
-  dd.content.push({
-    table: {
-      widths: ['*'],
+      autoTable(doc, {
+        startY: startY + 5,
+        head: [['Meio de Pagamento', 'Parcelas', 'Valor Parcela', 'Desconto']],
+        body: payBody,
+        theme: 'striped',
+        headStyles: { fillColor: [226, 232, 240], textColor: darkText },
+        styles: { fontSize: 9, cellPadding: 3, textColor: darkText },
+        columnStyles: {
+          1: { halign: 'center', cellWidth: 25 },
+          2: { halign: 'right', cellWidth: 35 },
+          3: { halign: 'center', cellWidth: 25 }
+        },
+        margin: { left: 14, right: 14 }
+      })
+      startY = doc.lastAutoTable.finalY + 15
+    } else {
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'italic')
+      doc.setTextColor(...mutedText)
+      doc.text('Nenhuma forma de pagamento definida.', 14, startY + 8)
+      startY += 15
+    }
+
+    doc.setFontSize(12)
+    doc.setFont('helvetica', 'bold')
+    doc.setTextColor(...primaryColor)
+    doc.text('OBSERVAÇÕES', 14, startY)
+
+    autoTable(doc, {
+      startY: startY + 5,
+      theme: 'plain',
+      styles: { fillColor: [248, 250, 252], cellPadding: 4, fontSize: 9, textColor: darkText },
       body: [
-        [{
-          text: budget.value.notes || 'Nenhuma observação.',
-          fontSize: 9,
-          color: budget.value.notes ? darkText : mutedText,
-          italics: !budget.value.notes,
-          border: [false, false, false, false],
-          fillColor: lightGray,
-          margin: [8, 8, 8, 8]
-        }]
-      ]
-    },
-    layout: 'noBorders'
-  })
-
-  // === ASSINATURA ===
-  dd.content.push({ text: '', margin: [0, 40, 0, 0] })
-  dd.content.push({
-    columns: [
-      {
-        width: '*',
-        stack: [
-          { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 200, y2: 0, lineWidth: 0.5, lineColor: darkText }] },
-          { text: 'Assinatura do Responsável', fontSize: 8, color: mutedText, margin: [0, 4, 0, 0], alignment: 'center', width: 200 }
-        ],
-        alignment: 'center'
+        [budget.value.notes || 'Nenhuma observação.']
+      ],
+      didParseCell: function(data) {
+        if (!budget.value.notes) {
+          data.cell.styles.fontStyle = 'italic'
+          data.cell.styles.textColor = mutedText
+        }
       },
-      {
-        width: '*',
-        stack: [
-          { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 200, y2: 0, lineWidth: 0.5, lineColor: darkText }] },
-          { text: 'Assinatura do Cliente', fontSize: 8, color: mutedText, margin: [0, 4, 0, 0], alignment: 'center', width: 200 }
-        ],
-        alignment: 'center'
-      }
-    ]
-  })
-
-  if (window.Capacitor && window.Capacitor.isNativePlatform()) {
-    pdfMake.createPdf(dd).getBuffer(async (buffer) => {
-      await api.savePdf(buffer, 'orcamento-' + budget.value.code + '.pdf')
+      margin: { left: 14, right: 14 }
     })
-  } else {
-    pdfMake.createPdf(dd).download('orcamento-' + budget.value.code + '.pdf')
+    startY = doc.lastAutoTable.finalY + 30
+
+    if (startY > 250) {
+       doc.addPage()
+       startY = 30
+    }
+
+    doc.setDrawColor(...darkText)
+    doc.setLineWidth(0.5)
+    doc.line(20, startY, 90, startY)
+    doc.line(120, startY, 190, startY)
+
+    doc.setFontSize(8)
+    doc.setFont('helvetica', 'normal')
+    doc.setTextColor(...mutedText)
+    doc.text('Assinatura do Responsável', 55, startY + 4, { align: 'center' })
+    doc.text('Assinatura do Cliente', 155, startY + 4, { align: 'center' })
+
+    const pageCount = doc.internal.getNumberOfPages()
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i)
+        doc.setFontSize(7)
+        doc.setTextColor(...mutedText)
+        doc.text('Orçamento gerado pelo sistema OrcaFácil', 14, 285)
+        doc.text('Página ' + i + ' de ' + pageCount, 196, 285, { align: 'right' })
+    }
+
+    testeMessagePdf.value = 'PDF Desenhado. Extraindo arrayBuffer...'
+
+    if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+      const buffer = doc.output('arraybuffer')
+      testeMessagePdf.value = 'Repassando pro Capacitor...'
+      await api.savePdf(buffer, 'orcamento-' + budget.value.code + '.pdf', (msg) => {
+        testeMessagePdf.value = msg
+      })
+      setTimeout(() => { testeMessagePdf.value = null }, 3000)
+    } else {
+      testeMessagePdf.value = 'Salvando no Desktop...'
+      doc.save('orcamento-' + budget.value.code + '.pdf')
+      testeMessagePdf.value = 'PDF Gerado com Sucesso!'
+      setTimeout(() => { testeMessagePdf.value = null }, 3000)
+    }
+
+  } catch (error) {
+    console.error('Erro ao gerar PDF com jsPDF:', error)
+    testeMessagePdf.value = 'Erro fatal: ' + error.message
   }
 }
+
 
 const calculateTotalWithoutDiscount = (items) => {
   let total = 0

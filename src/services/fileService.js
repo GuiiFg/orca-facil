@@ -58,37 +58,38 @@ export async function fileToBase64(fileOrPath) {
   }
 }
 
-/**
- * Save a PDF buffer to the device
- * On Electron: uses dialog.showSaveDialog via IPC
- * On Native: saves to Documents and opens share
- */
-export async function savePdf(buffer, filename = 'orcamento.pdf') {
+export async function savePdf(buffer, filename = 'orcamento.pdf', onProgress) {
   if (!Capacitor.isNativePlatform()) {
     return await window.api.savePdf(buffer)
   }
   try {
-    // Convert Uint8Array to base64
-    let base64
-    if (buffer instanceof Uint8Array || buffer instanceof ArrayBuffer) {
-      const bytes = buffer instanceof ArrayBuffer ? new Uint8Array(buffer) : buffer
-      let binary = ''
-      for (let i = 0; i < bytes.byteLength; i++) {
-        binary += String.fromCharCode(bytes[i])
-      }
-      base64 = btoa(binary)
-    } else {
+    if(onProgress) onProgress('Preparando dados binários...')
+    
+    let base64 = ''
+    if (typeof buffer === 'string') {
       base64 = buffer
+    } else {
+      if(onProgress) onProgress('Lendo nativamente como Base64...')
+      const blob = buffer instanceof Blob ? buffer : new Blob([buffer], { type: 'application/pdf' })
+      let dataUrl = await new Promise((resolve, reject) => {
+         const reader = new FileReader()
+         reader.onloadend = () => resolve(reader.result)
+         reader.onerror = reject
+         reader.readAsDataURL(blob)
+      })
+      // Strip 'data:application/pdf;base64,' prefix
+      base64 = dataUrl.split(',')[1]
     }
 
+    if(onProgress) onProgress('Gravando arquivo fisico no Cache...')
     const result = await Filesystem.writeFile({
       path: filename,
       data: base64,
-      directory: Directory.Documents,
+      directory: Directory.Cache,
       recursive: true
     })
 
-    // Try to share the file
+    if(onProgress) onProgress('Iniciando Dialog de Compartilhamento...')
     try {
       const { Share } = await import('@capacitor/share')
       await Share.share({
@@ -96,14 +97,19 @@ export async function savePdf(buffer, filename = 'orcamento.pdf') {
         url: result.uri,
         dialogTitle: 'Compartilhar orçamento'
       })
+      if(onProgress) onProgress('Compartilhamento concluído!')
     } catch (e) {
-      // Share not available, file is saved in Documents
-      console.log('PDF saved to:', result.uri)
+      console.error('Share error:', e)
+      if(onProgress) onProgress('Erro no Share: ' + e.message)
+      alert('Erro ao compartilhar PDF: ' + e.message)
     }
 
     return result.uri
   } catch (e) {
-    console.error('savePdf error:', e)
+    console.error('savePdf write error:', e)
+    if(onProgress) onProgress('Erro fatal na Gravação do Arquivo: ' + e.message)
+    alert('Erro ao gerar PDF: ' + e.message)
     return null
   }
 }
+

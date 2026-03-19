@@ -63,6 +63,8 @@
     "electron-squirrel-startup": "^1.0.1",
     "flowbite": "^3.1.2",
     "flowbite-vue": "^0.2.2",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.7",
     "maska": "^3.2.0",
     "pdfmake": "^0.3.3",
     "sqlite3": "^5.1.7",
