@@ -1,13 +1,12 @@
 <template>
-  <div class="bg-white dark:bg-gray-900">
+  <div>
+    <!-- Mobile backdrop -->
+    <div v-if="sideBarActions.sidebarOpen" class="sidebar-backdrop" @click="sideBarActions.toggle()"></div>
     <transition name="sidebar" appear>
       <FwbSidebar v-show="sideBarActions.sidebarOpen" class="w-64 h-screen bg-white border-r sidebar side-bar-entry-header">
         <SidebarItem label="Início" icon="fas fa-house" :click="handleGoToHome" />
         <SidebarItem label="Orçamentos" icon="fas fa-file-invoice-dollar" :click="handleGoToBudget" />
         <SidebarItem label="Clientes" icon="fas fa-user" :click="handleGoToCustomer" />
-        <!-- <SidebarDropItem label="Relacionamentos" icon="fas fa-users">
-          <SidebarItem label="Clientes" :click="handleGoToCustomer" className="pl-10"/>
-        </SidebarDropItem> -->
         <SidebarItem label="Produtos e Serviços" icon="fas fa-box" :click="handleGoToProductsAndServices" />
         <SidebarItem label="Meios de Pagamento" icon="fas fa-credit-card" :click="handleGoToPayments" />
         <SidebarItem label="Configurações" icon="fas fa-cog" :click="handleGoToSettings" />
@@ -92,12 +91,31 @@ const handleGoToSettings = () => {
   opacity: 1;
 }
 
-/* opcional: garantir que a sidebar fique acima do conteúdo durante a animação */
 .sidebar {
-  z-index: 10; /* reduzido para ficar abaixo do header (header z-index: 50) */
+  z-index: 10;
 }
 
 .side-bar-entry-header {
   padding-top: 70px;
+}
+
+/* Mobile backdrop - only visible on small screens */
+.sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 9;
+  }
+
+  .sidebar {
+    position: fixed !important;
+    z-index: 10;
+  }
 }
 </style>

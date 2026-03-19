@@ -32,7 +32,7 @@
               Informações básicas
             </p>
           </div>
-          <div class="flex flex-row gap-5">
+          <div class="flex flex-col md:flex-row gap-5">
             <div class="grow">
               <p class="font-medium text-gray-900 dark:text-white mb-2">Nome:</p>
               <FwbInput
@@ -65,7 +65,7 @@
                 :required="form.email.required"/>
             </div>
           </div>
-          <div class="flex flex-row gap-5 mt-4">
+          <div class="flex flex-col md:flex-row gap-5 mt-4">
             <div class="grow">
               <p class="font-medium text-gray-900 dark:text-white mb-2">Telefone:</p>
               <FwbInput
@@ -102,7 +102,7 @@
               Localização
             </p>
           </div>
-          <div class="flex flex-row gap-5">
+          <div class="flex flex-col md:flex-row gap-5">
             <div class="grow">
               <p class="font-medium text-gray-900 dark:text-white mb-2">Cep:</p>
               <FwbInput
@@ -132,7 +132,7 @@
                 :required="form.city.required"/>
             </div>
           </div>
-          <div class="flex flex-row gap-5 mt-4">
+          <div class="flex flex-col md:flex-row gap-5 mt-4">
             <div class="grow">
               <p class="font-medium text-gray-900 dark:text-white mb-2">Bairro:</p>
               <FwbInput
@@ -166,7 +166,7 @@
               Informações extras
             </p>
           </div>
-          <div class="flex flex-row gap-5">
+          <div class="flex flex-col md:flex-row gap-5">
             <div class="grow">
               <p class="font-medium text-gray-900 dark:text-white mb-2">Observações:</p>
               <FwbTextarea
@@ -206,6 +206,16 @@
         <TableColumn isText :value="customer.document" />
         <TableColumn isActions hasEdit hasDelete v-on:line:edit="handleEdit(customer)" v-on:line:delete="handleDelete(customer)" />
       </fwb-table-row>
+      <template #mobile>
+        <p v-if="customers.length === 0" class="text-center py-4 text-gray-500 dark:text-gray-400">Nenhum dado encontrado.</p>
+        <MobileCard v-else v-for="customer in customers" :key="customer.id"
+          :title="customer.name + ' ' + (customer.surname || '')"
+          hasEdit hasDelete @edit="handleEdit(customer)" @delete="handleDelete(customer)"
+          :cols="2">
+          <MobileCardField label="Celular" :value="customer.cellphone" isText />
+          <MobileCardField label="Documento" :value="customer.document" isText />
+        </MobileCard>
+      </template>
     </Tables>
   </div>
 </template>
@@ -216,6 +226,8 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import Forms from '@/components/dataManagers/Forms/forms.vue'
 import Tables from '@/components/dataManagers/Tables/tables.vue'
 import TableColumn from '@/components/dataManagers/TableColumn/tableColumn.vue'
+import MobileCard from '@/components/dataManagers/MobileCard/mobileCard.vue'
+import MobileCardField from '@/components/dataManagers/MobileCard/mobileCardField.vue'
 import { ref, onMounted, computed, toRaw } from 'vue'
 import FormHelpers from '@/helpers/formHelpers.js'
 import CustomerForm from './form'

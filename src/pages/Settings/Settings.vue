@@ -21,7 +21,7 @@
           Informações básicas
         </p>
       </div>
-      <div class="flex flex-row gap-5">
+      <div class="flex flex-col md:flex-row gap-5">
         <div class="md:w-1/3">
           <p class="font-medium text-gray-900 dark:text-white mb-2">Logo do Orçamento:</p>
           <FwbInput

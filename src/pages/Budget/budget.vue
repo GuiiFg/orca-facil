@@ -31,7 +31,7 @@
               Informações básicas
             </p>
           </div>
-          <div class="flex flex-row gap-5">
+          <div class="flex flex-col md:flex-row gap-5">
             <div class="grow">
               <p class="font-medium text-gray-900 dark:text-white mb-2">Código:</p>
               <FwbInput type="text" placeholder="Digite o código do orçamento" v-model="form.code.value"
@@ -54,7 +54,7 @@
             </div>
 
           </div>
-          <div class="flex flex-row gap-5 mt-4">
+          <div class="flex flex-col md:flex-row gap-5 mt-4">
             <div class="grow">
               <p class="font-medium text-gray-900 dark:text-white mb-2">Observações:</p>
               <FwbTextarea v-model="form.notes.value" :validation-status="form.notes.status"
@@ -82,6 +82,16 @@
         <TableColumn isActions hasEdit hasDelete v-on:line:edit="handleEdit(budget)"
           v-on:line:delete="handleDelete(budget)" />
       </fwb-table-row>
+      <template #mobile>
+        <p v-if="budgets.length === 0" class="text-center py-4 text-gray-500 dark:text-gray-400">Nenhum dado encontrado.</p>
+        <MobileCard v-else v-for="budget in budgets" :key="budget.id"
+          :title="budget.code" :subtitle="budget.customer_name || 'Sem cliente'"
+          hasEdit hasDelete @edit="handleEdit(budget)" @delete="handleDelete(budget)">
+          <MobileCardField label="Valor" :value="budget.total_price" isMoney color="blue" />
+          <MobileCardField label="Custo" :value="budget.total_cost" isMoney color="red" />
+          <MobileCardField label="Lucro" :value="budget.total_price - budget.total_cost" isMoney color="green" />
+        </MobileCard>
+      </template>
     </Tables>
   </div>
 </template>
@@ -92,6 +102,8 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import Forms from '@/components/dataManagers/Forms/forms.vue'
 import Tables from '@/components/dataManagers/Tables/tables.vue'
 import TableColumn from '@/components/dataManagers/TableColumn/tableColumn.vue'
+import MobileCard from '@/components/dataManagers/MobileCard/mobileCard.vue'
+import MobileCardField from '@/components/dataManagers/MobileCard/mobileCardField.vue'
 import { ref, onMounted, toRaw } from 'vue'
 import FormHelpers from '@/helpers/formHelpers.js'
 import BudgetForm from './form'
@@ -144,6 +156,12 @@ const searchCustomers = async (query) => {
     id: customer.id,
     name: customer.name + ' ' + customer.surname,
   }))
+}
+
+const formatMoneyMobile = (value) => {
+  if (value === null || value === undefined) value = 0
+  const numberValue = parseFloat(value.toString().replace(/[^0-9.-]+/g,""))
+  return numberValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
 onMounted(() => {

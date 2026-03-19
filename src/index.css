@@ -11,3 +11,29 @@
 body {
 
 }
+
+/* ===== Flowbite Modal scroll fix for small screens ===== */
+
+/* The modal backdrop/overlay should scroll */
+div[modal-backdrop] + div,
+.fixed.inset-0[role="dialog"],
+div.fixed.inset-0.z-50 {
+  overflow-y: auto !important;
+}
+
+/* Modal wrapper — center on large screens, scroll on small */
+div[modal-backdrop] + div > div,
+.fixed.inset-0[role="dialog"] > div {
+  max-height: 100vh;
+  max-height: 100dvh;
+  overflow-y: auto;
+}
+
+/* Modal content itself */
+.relative.bg-white.rounded-lg,
+.relative.bg-white.dark\:bg-gray-700.rounded-lg {
+  max-height: 90vh;
+  max-height: 90dvh;
+  overflow-y: auto;
+  margin: 1rem auto;
+}

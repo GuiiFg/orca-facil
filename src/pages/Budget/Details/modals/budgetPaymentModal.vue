@@ -18,7 +18,7 @@
             Informações do Pagamento
           </p>
         </div>
-        <div class="flex flex-row gap-5 mt-4">
+        <div class="flex flex-col md:flex-row gap-5 mt-4">
           <div class="grow">
             <p class="font-medium text-gray-900 dark:text-white mb-2">Meio de Pagamento:</p>
             <div class="auto-complete-fixer">
@@ -32,7 +32,7 @@
             </div>
           </div>
         </div>
-        <div class="flex flex-row gap-5 mt-4">
+        <div class="flex flex-col md:flex-row gap-5 mt-4">
           <div class="grow">
             <p class="font-medium text-gray-900 dark:text-white mb-2">Máximo de parcelas:</p>
             <FwbInput
@@ -51,7 +51,7 @@
             </FwbInput>
           </div>
         </div>
-        <div class="flex flex-row gap-5 mt-4">
+        <div class="flex flex-col md:flex-row gap-5 mt-4">
           <div class="grow">
             <p class="font-medium text-gray-900 dark:text-white mb-2">Valor Total de Cada Parcela:</p>
             <FwbInput

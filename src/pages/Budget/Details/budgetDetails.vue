@@ -26,7 +26,7 @@
       <template #body>
         <Forms title="Orçamentos" description="Editar orçamento." icon="fas fa-file-invoice-dollar"
           @form:save="handleSave" @form:clear="handleClear" :hasHeader="false">
-          <div class="flex flex-row gap-5">
+          <div class="flex flex-col md:flex-row gap-5">
             <div class="grow">
               <p class="font-medium text-gray-900 dark:text-white mb-2">Cliente:</p>
               <div class="auto-complete-fixer w-full">
@@ -39,7 +39,7 @@
               </div>
             </div>
           </div>
-          <div class="flex flex-row gap-5 mt-4">
+          <div class="flex flex-col md:flex-row gap-5 mt-4">
             <div class="grow">
               <p class="font-medium text-gray-900 dark:text-white mb-2">Observações:</p>
               <FwbTextarea v-model="editForm.notes.value" :validation-status="editForm.notes.status"
@@ -149,7 +149,7 @@
         </FwbAccordionHeader>
         <FwbAccordionContent>
           <div v-if="customer">
-            <div class="flex flex-row gap-5">
+            <div class="flex flex-col md:flex-row gap-5">
               <div class="grow">
                 <p class="font-medium text-gray-900 dark:text-white mb-2">Nome:</p>
                 <FwbInput type="text" disabled v-model="customer.name" />
@@ -163,7 +163,7 @@
                 <FwbInput type="text" disabled v-model="customer.cellphone" />
               </div>
             </div>
-            <div class="flex flex-row gap-5 mt-4">
+            <div class="flex flex-col md:flex-row gap-5 mt-4">
               <div class="grow">
                 <p class="font-medium text-gray-900 dark:text-white mb-2">Email:</p>
                 <FwbInput type="text" disabled v-model="customer.email" />
@@ -177,7 +177,7 @@
                 <FwbInput type="text" disabled v-model="customer.zipcode" />
               </div>
             </div>
-            <div class="flex flex-row gap-5 mt-4">
+            <div class="flex flex-col md:flex-row gap-5 mt-4">
               <div class="grow">
                 <p class="font-medium text-gray-900 dark:text-white mb-2">Cep:</p>
                 <FwbInput type="text" disabled v-model="customer.state" />
@@ -191,7 +191,7 @@
                 <FwbInput type="text" disabled v-model="customer.city" />
               </div>
             </div>
-            <div class="flex flex-row gap-5 mt-4">
+            <div class="flex flex-col md:flex-row gap-5 mt-4">
               <div class="grow">
                 <p class="font-medium text-gray-900 dark:text-white mb-2">Bairro:</p>
                 <FwbInput type="text" disabled v-model="customer.district" />
@@ -262,6 +262,16 @@
         <TableColumn isMoney :value="(item.unit_cost * item.quantity) * (1 - (item.discount / 100))" />
         <TableColumn isActions hasEdit hasDelete v-on:line:edit="handleEditItem(item.id)" v-on:line:delete="handleDeleteItem(item.id)" />
       </fwb-table-row>
+      <template #mobile>
+        <p v-if="budgetItems.length === 0" class="text-center py-4 text-gray-500 dark:text-gray-400">Nenhum produto ou serviço adicionado.</p>
+        <MobileCard v-else v-for="item in budgetItems" :key="item.id"
+          :title="item.product_name" :subtitle="item.product_code"
+          hasEdit hasDelete @edit="handleEditItem(item.id)" @delete="handleDeleteItem(item.id)">
+          <MobileCardField label="Qtde." :value="item.quantity" isText />
+          <MobileCardField label="Preço Unit." :value="item.unit_price" isMoney color="blue" />
+          <MobileCardField label="Total" :value="item.total_price" isMoney color="green" />
+        </MobileCard>
+      </template>
     </Tables>
 
     <Tables
@@ -285,6 +295,16 @@
         <TableColumn isPercent :value="pay.discount" />
         <TableColumn isActions hasEdit hasDelete v-on:line:edit="handleEditPayment(pay.id)" v-on:line:delete="handleDeletePayment(pay.id)" />
       </fwb-table-row>
+      <template #mobile>
+        <p v-if="budgetPayments.length === 0" class="text-center py-4 text-gray-500 dark:text-gray-400">Nenhum meio de pagamento adicionado.</p>
+        <MobileCard v-else v-for="pay in budgetPayments" :key="pay.id"
+          :title="pay.payment_name"
+          hasEdit hasDelete @edit="handleEditPayment(pay.id)" @delete="handleDeletePayment(pay.id)">
+          <MobileCardField label="Parcelas" :value="pay.installments + 'x'" isText />
+          <MobileCardField label="Valor" :value="pay.installment_value" isMoney color="blue" />
+          <MobileCardField label="Desconto" :value="pay.discount ? pay.discount + '%' : '0%'" isText color="yellow" />
+        </MobileCard>
+      </template>
     </Tables>
     <div class="mt-4 flex justify-end">
       <FwbButton color="green" @click="handleGeneratePdf">
@@ -306,6 +326,8 @@ import { useRouter } from 'vue-router'
 import { nextTick, onMounted, ref, toRaw, computed } from "vue";
 import TableColumn from '@/components/dataManagers/TableColumn/tableColumn.vue'
 import Tables from '@/components/dataManagers/Tables/tables.vue'
+import MobileCard from '@/components/dataManagers/MobileCard/mobileCard.vue'
+import MobileCardField from '@/components/dataManagers/MobileCard/mobileCardField.vue'
 import BudgetItemModal from './modals/budgetItemModal.vue'
 import BudgetPaymentModal from './modals/budgetPaymentModal.vue'
 import EditForm from './form.js'

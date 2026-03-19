@@ -1,6 +1,6 @@
 <template>
   <FwbCard>
-    <div class="flex flex-row gap-5">
+    <div class="flex flex-col sm:flex-row gap-3 sm:gap-5">
       <div class="grow" v-if="props.hasSearch">
         <fwb-input type="text" placeholder="Pesquisar..." class="mb-4" v-model="searchQuery">
           <template #prefix>
@@ -8,29 +8,41 @@
           </template>
         </fwb-input>
       </div>
-      <div class="flex-none" v-if="props.hasReload">
-        <fwb-button type="button" @click="handleReload" class="mb-4 cursor-pointer">
-          <FontAwesomeIcon icon="fas fa-sync" />
-          Recarregar
-        </fwb-button>
-      </div>
-      <div class="flex-none" v-if="props.hasNew">
-        <fwb-button type="button" color="green" @click="handleNewClick" class="mb-4 cursor-pointer">
-          <FontAwesomeIcon icon="fas fa-plus" />
-          Novo
-        </fwb-button>
+      <div class="flex gap-2 flex-shrink-0">
+        <div class="flex-none" v-if="props.hasReload">
+          <fwb-button type="button" @click="handleReload" class="mb-4 cursor-pointer">
+            <FontAwesomeIcon icon="fas fa-sync" />
+            <span v-if="!isMobile" class="ml-1">Recarregar</span>
+          </fwb-button>
+        </div>
+        <div class="flex-none" v-if="props.hasNew">
+          <fwb-button type="button" color="green" @click="handleNewClick" class="mb-4 cursor-pointer">
+            <FontAwesomeIcon icon="fas fa-plus" />
+            <span v-if="!isMobile" class="ml-1">Novo</span>
+          </fwb-button>
+        </div>
       </div>
     </div>
-    <fwb-table hoverable>
-      <fwb-table-head>
-        <fwb-table-head-cell v-for="( column, index ) in props.columns" :key="index">
-          {{ column }}
-        </fwb-table-head-cell>
-      </fwb-table-head>
-      <fwb-table-body>
-        <slot />
-      </fwb-table-body>
-    </fwb-table>
+
+    <!-- Desktop: table view -->
+    <div v-if="!isMobile" class="overflow-x-auto">
+      <fwb-table hoverable>
+        <fwb-table-head>
+          <fwb-table-head-cell v-for="( column, index ) in props.columns" :key="index">
+            {{ column }}
+          </fwb-table-head-cell>
+        </fwb-table-head>
+        <fwb-table-body>
+          <slot />
+        </fwb-table-body>
+      </fwb-table>
+    </div>
+
+    <!-- Mobile: card view -->
+    <div v-else class="mobile-cards">
+      <slot name="mobile" />
+    </div>
+
     <div class="flex justify-start mt-4">
       <p class="font-normal text-gray-700 dark:text-gray-400">Total: {{ props.total }}</p>
     </div>
@@ -55,7 +67,9 @@ import {
   FwbButton
 } from 'flowbite-vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
+
+const MOBILE_BREAKPOINT = 768
 
 const props = defineProps({
   columns: {
@@ -94,9 +108,23 @@ const props = defineProps({
   }
 })
 
+const isMobile = ref(false)
 const currentPage = ref(props.page)
 const totalPages = ref(props.totalPages)
 const searchQuery = ref('')
+
+const checkMobile = () => {
+  isMobile.value = window.innerWidth < MOBILE_BREAKPOINT
+}
+
+onMounted(() => {
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile)
+})
 
 const emit = defineEmits(['update:page', 'search', 'new', 'reload']);
 
@@ -118,3 +146,11 @@ watch(() => searchQuery.value, (newQuery) => {
   emit('search', newQuery)
 })
 </script>
+
+<style scoped>
+.mobile-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+</style>

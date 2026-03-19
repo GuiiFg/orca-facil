@@ -33,7 +33,7 @@
               Informações básicas
             </p>
           </div>
-          <div class="flex flex-row gap-5">
+          <div class="flex flex-col md:flex-row gap-5">
             <div class="grow">
               <p class="font-medium text-gray-900 dark:text-white mb-2">Código:</p>
               <FwbInput
@@ -74,7 +74,7 @@
               </FwbInput>
             </div>
           </div>
-          <div class="flex flex-row gap-5 mt-4">
+          <div class="flex flex-col md:flex-row gap-5 mt-4">
             <div class="grow">
               <p class="font-medium text-gray-900 dark:text-white mb-2">Tipo:</p>
               <fwb-select
@@ -97,7 +97,7 @@
                   :required="form.cost.required"/>
             </div>
           </div>
-          <div class="flex flex-row gap-5 mt-4">
+          <div class="flex flex-col md:flex-row gap-5 mt-4">
             <div class="grow">
               <p class="font-medium text-gray-900 dark:text-white mb-2">Descrição:</p>
               <FwbTextarea
@@ -140,6 +140,20 @@
         <TableColumn isMoney :value="product.amount ? product.amount.toString() : '0'" />
         <TableColumn isActions hasEdit hasDelete v-on:line:edit="handleEdit(product)" v-on:line:delete="handleDelete(product)" />
       </fwb-table-row>
+      <template #mobile>
+        <p v-if="products.length === 0" class="text-center py-4 text-gray-500 dark:text-gray-400">Nenhum dado encontrado.</p>
+        <MobileCard v-else v-for="product in products" :key="product.id"
+          :title="product.name" :subtitle="product.code"
+          hasEdit hasDelete @edit="handleEdit(product)" @delete="handleDelete(product)">
+          <template #badge>
+            <fwb-badge v-if="product.type === 0" class="w-min">Produto</fwb-badge>
+            <fwb-badge v-else-if="product.type === 1" type="pink" class="w-min">Serviço</fwb-badge>
+            <fwb-badge v-else class="w-min" type="dark">N/D</fwb-badge>
+          </template>
+          <MobileCardField label="Valor" :value="product.amount" isMoney color="blue" />
+          <MobileCardField label="Custo" :value="product.cost" isMoney color="red" />
+        </MobileCard>
+      </template>
     </Tables>
   </div>
 </template>
@@ -150,6 +164,8 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import Forms from '@/components/dataManagers/Forms/forms.vue'
 import Tables from '@/components/dataManagers/Tables/tables.vue'
 import TableColumn from '@/components/dataManagers/TableColumn/tableColumn.vue'
+import MobileCard from '@/components/dataManagers/MobileCard/mobileCard.vue'
+import MobileCardField from '@/components/dataManagers/MobileCard/mobileCardField.vue'
 import { ref, onMounted, toRaw } from 'vue'
 import FormHelpers from '@/helpers/formHelpers.js'
 import ProductsForm from './form'
@@ -181,6 +197,12 @@ const handleSearchProducts = async () => {
   products.value = data
   totalPages.value = pages
   totalItems.value = total
+}
+
+const formatMoneyMobile = (value) => {
+  if (value === null || value === undefined) value = '0'
+  const numberValue = parseFloat(value.toString().replace(/[^0-9.-]+/g,""))
+  return numberValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
 onMounted(() => {

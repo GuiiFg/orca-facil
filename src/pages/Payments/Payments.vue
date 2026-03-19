@@ -33,7 +33,7 @@
               Informações básicas
             </p>
           </div>
-          <div class="flex flex-row gap-5">
+          <div class="flex flex-col md:flex-row gap-5">
             <div class="md:w-1/3">
               <p class="font-medium text-gray-900 dark:text-white mb-2">Nome:</p>
               <FwbInput
@@ -48,7 +48,7 @@
               </FwbInput>
             </div>
           </div>
-          <div class="flex flex-row gap-5 mt-4">
+          <div class="flex flex-col md:flex-row gap-5 mt-4">
             <div class="grow">
               <p class="font-medium text-gray-900 dark:text-white mb-2">Descrição:</p>
               <FwbTextarea
@@ -84,6 +84,12 @@
         <TableColumn isText :value="payment.description" />
         <TableColumn isActions hasEdit hasDelete v-on:line:edit="handleEdit(payment)" v-on:line:delete="handleDelete(payment)" />
       </fwb-table-row>
+      <template #mobile>
+        <p v-if="payments.length === 0" class="text-center py-4 text-gray-500 dark:text-gray-400">Nenhum dado encontrado.</p>
+        <MobileCard v-else v-for="payment in payments" :key="payment.id"
+          :title="payment.name" :subtitle="payment.description || 'Sem descrição'"
+          hasEdit hasDelete @edit="handleEdit(payment)" @delete="handleDelete(payment)" />
+      </template>
     </Tables>
   </div>
 </template>
@@ -94,6 +100,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import Forms from '@/components/dataManagers/Forms/forms.vue'
 import Tables from '@/components/dataManagers/Tables/tables.vue'
 import TableColumn from '@/components/dataManagers/TableColumn/tableColumn.vue'
+import MobileCard from '@/components/dataManagers/MobileCard/mobileCard.vue'
 import { ref, onMounted, toRaw } from 'vue'
 import FormHelpers from '@/helpers/formHelpers.js'
 import PaymentsForm from './form'
